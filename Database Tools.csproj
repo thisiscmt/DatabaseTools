@@ -1,0 +1,276 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{180C5DCD-1C0E-4296-B327-8D95DFDEE80D}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>DBTools</RootNamespace>
+    <AssemblyName>DBTools</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Data_Dataset.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>DBTools.Program</StartupObject>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Ionic.Zip">
+      <HintPath>.\Ionic.Zip.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.SqlServer.ConnectionInfo, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>.\Microsoft.SqlServer.ConnectionInfo.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.SqlServer.Management.Sdk.Sfc, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>.\Microsoft.SqlServer.Management.Sdk.Sfc.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.SqlServer.Smo, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>.\Microsoft.SqlServer.Smo.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.SqlServer.SmoExtended, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>.\Microsoft.SqlServer.SmoExtended.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.SqlServer.SqlEnum, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>.\Microsoft.SqlServer.SqlEnum.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.SqlServer.SqlWmiManagement, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>.\Microsoft.SqlServer.SqlWmiManagement.dll</HintPath>
+    </Reference>
+    <Reference Include="Nini">
+      <HintPath>.\Nini.dll</HintPath>
+    </Reference>
+    <Reference Include="SqlDataAccess, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>.\SqlDataAccess.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Classes\BackgroundWorkerExt.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Classes\BackupJob.cs" />
+    <Compile Include="Classes\CopyJob.cs" />
+    <Compile Include="Classes\ItemData.cs" />
+    <Compile Include="Classes\Job.cs" />
+    <Compile Include="Classes\ExtensionMethods.cs" />
+    <Compile Include="Classes\JobEngine.cs" />
+    <Compile Include="Classes\JobEngineParameters.cs" />
+    <Compile Include="Classes\JobEventArgs.cs" />
+    <Compile Include="Classes\JobList.cs" />
+    <Compile Include="Classes\RestoreJob.cs" />
+    <Compile Include="Classes\ServerUtility.cs" />
+    <Compile Include="Classes\ShrinkJob.cs" />
+    <Compile Include="Classes\User.cs" />
+    <Compile Include="Classes\Utility.cs" />
+    <Compile Include="Classes\WizardForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmAbout.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmAbout.Designer.cs">
+      <DependentUpon>frmAbout.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frmBackupJob.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmBackupJob.Designer.cs">
+      <DependentUpon>frmBackupJob.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frmBrowse.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmBrowse.Designer.cs">
+      <DependentUpon>frmBrowse.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frmCopyJob.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmCopyJob.Designer.cs">
+      <DependentUpon>frmCopyJob.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frmCreateBackupScript.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmCreateBackupScript.Designer.cs">
+      <DependentUpon>frmCreateBackupScript.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frmLogin.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmLogin.Designer.cs">
+      <DependentUpon>frmLogin.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frmMain.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmMain.Designer.cs">
+      <DependentUpon>frmMain.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frmOptions.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmOptions.Designer.cs">
+      <DependentUpon>frmOptions.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frmRestoreJob.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmRestoreJob.Designer.cs">
+      <DependentUpon>frmRestoreJob.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frmShrinkJob.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmShrinkJob.Designer.cs">
+      <DependentUpon>frmShrinkJob.cs</DependentUpon>
+    </Compile>
+    <Compile Include="frmSystemLog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmSystemLog.Designer.cs">
+      <DependentUpon>frmSystemLog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Classes\JobForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <EmbeddedResource Include="Classes\WizardForm.resx">
+      <DependentUpon>WizardForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmAbout.resx">
+      <DependentUpon>frmAbout.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmBackupJob.resx">
+      <DependentUpon>frmBackupJob.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmBrowse.resx">
+      <DependentUpon>frmBrowse.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmCopyJob.resx">
+      <DependentUpon>frmCopyJob.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmCreateBackupScript.resx">
+      <DependentUpon>frmCreateBackupScript.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmLogin.resx">
+      <DependentUpon>frmLogin.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmMain.resx">
+      <DependentUpon>frmMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmOptions.resx">
+      <DependentUpon>frmOptions.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmRestoreJob.resx">
+      <DependentUpon>frmRestoreJob.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmShrinkJob.resx">
+      <DependentUpon>frmShrinkJob.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmSystemLog.resx">
+      <DependentUpon>frmSystemLog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <None Include="app.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Data_Dataset.ico" />
+    <Content Include="Images\book_open.ico" />
+    <Content Include="Images\book_open.png" />
+    <Content Include="Images\cog_delete.png" />
+    <Content Include="Images\cog_edit.png" />
+    <Content Include="Images\control_play_blue.png" />
+    <Content Include="Images\database.png" />
+    <Content Include="Images\database_gear.png" />
+    <Content Include="Images\database_go.png" />
+    <Content Include="Images\database_lightning.png" />
+    <Content Include="Images\database_refresh.png" />
+    <Content Include="Images\database_save.png" />
+    <Content Include="Images\Data_Dataset.ico" />
+    <Content Include="Images\disk.png" />
+    <Content Include="Images\folder.png" />
+    <Content Include="Images\folder_magnify.png" />
+    <Content Include="Images\lock.png" />
+    <Content Include="Images\page.png" />
+    <Content Include="Images\script_save.png" />
+    <Content Include="Ionic.Zip.dll" />
+    <Content Include="Microsoft.SqlServer.ConnectionInfo.dll" />
+    <Content Include="Microsoft.SqlServer.Management.Sdk.Sfc.dll" />
+    <Content Include="Microsoft.SqlServer.Smo.dll" />
+    <Content Include="Microsoft.SqlServer.SmoExtended.dll" />
+    <Content Include="Microsoft.SqlServer.SqlEnum.dll" />
+    <Content Include="Microsoft.SqlServer.SqlWmiManagement.dll" />
+    <Content Include="Nini.dll" />
+    <Content Include="SqlDataAccess.dll" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
