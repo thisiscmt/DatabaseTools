@@ -11,10 +11,11 @@ Features:
 * Maintains a system log for any errors generated during job execution
 * Includes a wizard for creating a SQL script for backing up selected databases
 * Can be run silently from the command line, useful for running jobs within a scheduled task
-Sample command:
-: dbtools.exe /jobfile:"c:\Some job file.xml" /server:myserver /auth:SQL /user:MyUserId /password:MyPassword
 
-: If /auth:Windows is used, the account associated with the calling process is assumed to have rights to access the server.
+   Sample command:
+   dbtools.exe /jobfile:"c:\Some job file.xml" /server:myserver /auth:SQL /user:MyUserId /password:MyPassword
+
+   If /auth:Windows is used, the account associated with the calling process is assumed to have rights to access the server.
 
 It uses the following open source libraries:
 
