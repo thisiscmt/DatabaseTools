@@ -4,18 +4,18 @@ Database Tools is a WinForm application written in C# for managing Microsoft SQL
 
 Features:
 
-* When logging into the SQL server at startup, you can select SQL or Windows authentication. Using Windows authentication assumes the current account has rights to access the server
-* Includes four basic job types: backup, restore, shrink, and copy. You can add, edit, or delete jobs as desired, and cancel job execution at any point
-* Each type of job supports different kinds of tasks, such as backing up all user databases, or restoring all backups within a given directory
-* Keeps track of most recently used job files
-* Maintains a system log for any errors generated during job execution
-* Includes a wizard for creating a SQL script for backing up selected databases
-* Can be run silently from the command line, useful for running jobs within a scheduled task
+* When logging into the SQL server at startup, you can select SQL or Windows authentication. Using Windows authentication assumes the current account has rights to access the server.
+* Includes four basic job types: backup, restore, shrink, and copy. You can add, edit, or delete jobs as desired, and cancel job execution at any point.
+* Each type of job supports different kinds of tasks, such as backing up all user databases, or restoring all backups within a given directory.
+* Keeps track of most recently used job files.
+* Maintains a system log for any errors generated during job execution.
+* Includes a wizard for creating a SQL script for backing up selected databases.
+* Can be run silently from the command line, useful for running jobs within a scheduled task.
 
-   Sample command:
-   dbtools.exe /jobfile:"c:\Some job file.xml" /server:myserver /auth:SQL /user:MyUserId /password:MyPassword
+Sample command:
+dbtools.exe /jobfile:"c:\Some job file.xml" /server:myserver /auth:SQL /user:MyUserId /password:MyPassword
 
-   If /auth:Windows is used, the account associated with the calling process is assumed to have rights to access the server.
+If /auth:Windows is used, the account associated with the calling process is assumed to have rights to access the server.
 
 It uses the following open source libraries:
 
