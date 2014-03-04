@@ -21,4 +21,4 @@ It uses the following open source libraries:
 
 * [Nini](http://nini.sourceforge.net)
 * [DotNetZip](http://dotnetzip.codeplex.com)
-* [SQL Data Access](http://sqldataaccesslib.codeplex.com)
+* [SQL Data Access](https://github.com/thisiscmt/SqlDataAccess)
