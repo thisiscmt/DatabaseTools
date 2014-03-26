@@ -40,39 +40,40 @@
     <StartupObject>DBTools.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Ionic.Zip">
-      <HintPath>.\Ionic.Zip.dll</HintPath>
+    <Reference Include="Ionic.Zip, Version=1.9.1.5, Culture=neutral, PublicKeyToken=edbe51ad942a3f5c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>lib\Ionic.Zip.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.SqlServer.ConnectionInfo, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\Microsoft.SqlServer.ConnectionInfo.dll</HintPath>
+      <HintPath>lib\Microsoft.SqlServer.ConnectionInfo.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.SqlServer.Management.Sdk.Sfc, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\Microsoft.SqlServer.Management.Sdk.Sfc.dll</HintPath>
+      <HintPath>lib\Microsoft.SqlServer.Management.Sdk.Sfc.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.SqlServer.Smo, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\Microsoft.SqlServer.Smo.dll</HintPath>
+      <HintPath>lib\Microsoft.SqlServer.Smo.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.SqlServer.SmoExtended, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\Microsoft.SqlServer.SmoExtended.dll</HintPath>
+      <HintPath>lib\Microsoft.SqlServer.SmoExtended.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.SqlServer.SqlEnum, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\Microsoft.SqlServer.SqlEnum.dll</HintPath>
+      <HintPath>lib\Microsoft.SqlServer.SqlEnum.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.SqlServer.SqlWmiManagement, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\Microsoft.SqlServer.SqlWmiManagement.dll</HintPath>
+      <HintPath>lib\Microsoft.SqlServer.SqlWmiManagement.dll</HintPath>
     </Reference>
     <Reference Include="Nini">
-      <HintPath>.\Nini.dll</HintPath>
+      <HintPath>lib\Nini.dll</HintPath>
     </Reference>
     <Reference Include="SqlDataAccess, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\SqlDataAccess.dll</HintPath>
+      <HintPath>lib\SqlDataAccess.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -256,6 +257,15 @@
     <Content Include="Images\page.png" />
     <Content Include="Images\script_save.png" />
     <Content Include="Ionic.Zip.dll" />
+    <Content Include="lib\Ionic.Zip.dll" />
+    <Content Include="lib\Microsoft.SqlServer.ConnectionInfo.dll" />
+    <Content Include="lib\Microsoft.SqlServer.Management.Sdk.Sfc.dll" />
+    <Content Include="lib\Microsoft.SqlServer.Smo.dll" />
+    <Content Include="lib\Microsoft.SqlServer.SmoExtended.dll" />
+    <Content Include="lib\Microsoft.SqlServer.SqlEnum.dll" />
+    <Content Include="lib\Microsoft.SqlServer.SqlWmiManagement.dll" />
+    <Content Include="lib\Nini.dll" />
+    <Content Include="lib\SqlDataAccess.dll" />
     <Content Include="Microsoft.SqlServer.ConnectionInfo.dll" />
     <Content Include="Microsoft.SqlServer.Management.Sdk.Sfc.dll" />
     <Content Include="Microsoft.SqlServer.Smo.dll" />
