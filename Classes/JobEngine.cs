@@ -68,10 +68,25 @@ namespace DBTools
                 jobEventArgs.Message = "Backing up database '" + job.Database + "' ...";
                 RaiseJobProgressEvent(jobEventArgs);
                 this.m_curDatabase = job.Database;
+                string backupPath = job.Path;
 
-                if (!BackupDatabase(job.Database, 
-                                    job.Path, 
-                                    job.BackupType, 
+                if (job.RollingBackups)
+                {
+                    DirectoryInfo backupDir = new DirectoryInfo(job.Path);
+                    var existingBackups = backupDir.GetFiles($"{job.Database}*.bak").OrderBy(x => x.Name);
+
+                    if (job.MaxBackups > 0 && existingBackups.Count() >= job.MaxBackups)
+                    {
+                        File.Delete(existingBackups.First().FullName);
+                    }
+
+                    long timestamp = new DateTimeOffset(DateTime.Now.ToUniversalTime()).ToUnixTimeMilliseconds();
+                    backupPath += $"\\{job.Database}_{timestamp}.bak";
+                }
+
+                if (!BackupDatabase(job.Database,
+                                    backupPath,
+                                    job.BackupType,
                                     job.BackupOption))
                 {
                     return false;

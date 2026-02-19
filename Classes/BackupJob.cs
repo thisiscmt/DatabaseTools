@@ -35,5 +35,11 @@ namespace DBTools
 
         [XmlElement("backup_option")]
         public BackupOverwriteOptions BackupOption { get; set; }
+
+        [XmlElement("rolling_backups")]
+        public bool RollingBackups { get; set; }
+
+        [XmlElement("max_backups")]
+        public int MaxBackups { get; set; }
     }
 }
