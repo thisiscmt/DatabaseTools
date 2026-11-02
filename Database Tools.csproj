@@ -60,10 +60,6 @@
     <StartupObject>DBTools.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Ionic.Zip, Version=1.9.1.5, Culture=neutral, PublicKeyToken=edbe51ad942a3f5c, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>lib\Ionic.Zip.dll</HintPath>
-    </Reference>
     <Reference Include="Nini">
       <HintPath>lib\Nini.dll</HintPath>
     </Reference>
@@ -73,6 +69,8 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -252,7 +250,6 @@
     <Content Include="Images\lock.png" />
     <Content Include="Images\page.png" />
     <Content Include="Images\script_save.png" />
-    <Content Include="lib\Ionic.Zip.dll" />
     <Content Include="lib\Nini.dll" />
     <Content Include="lib\SqlDataAccess.dll" />
   </ItemGroup>
@@ -271,9 +268,6 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.SqlServer.SqlManagementObjects">
       <Version>181.37.1</Version>
-    </PackageReference>
-    <PackageReference Include="System.Security.Cryptography.Pkcs">
-      <Version>8.0.2</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using System.IO.Compression;
 using System.Windows.Forms;
 using System.Drawing;
 using System.Xml.Serialization;
 using System.Net;
-using Ionic.Zip;
 
 namespace DBTools
 {
@@ -202,16 +202,8 @@ namespace DBTools
 
         public static string ExtractFilesFromZipArchive(string filePath)
         {
-            ZipFile zip;
-            string tempPath;
-
-            tempPath = Path.Combine(Environment.SystemDirectory.Substring(0, 3), Path.GetRandomFileName());
-
-            using (zip = new ZipFile(filePath))
-            {
-                zip.Encryption = EncryptionAlgorithm.None;
-                zip.ExtractAll(tempPath, ExtractExistingFileAction.OverwriteSilently);
-            }
+            string tempPath = Path.Combine(Environment.SystemDirectory.Substring(0, 3), Path.GetRandomFileName());
+            ZipFile.ExtractToDirectory(filePath, tempPath);
 
             return tempPath;
         }
