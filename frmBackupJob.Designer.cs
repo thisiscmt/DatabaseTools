@@ -1,6 +1,6 @@
 ﻿namespace DBTools
 {
-    partial class frmBackupJob
+    partial class BackupJobForm
     {
         /// <summary>
         /// Required designer variable.

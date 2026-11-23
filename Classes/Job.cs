@@ -1,9 +1,12 @@
-﻿using System.Collections.Generic;
-using System.Runtime.Serialization;
-using System.Xml.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace DBTools
 {
+    [JsonDerivedType(typeof(Job), typeDiscriminator: "base")]
+    [JsonDerivedType(typeof(BackupJob), typeDiscriminator: "backup")]
+    [JsonDerivedType(typeof(RestoreJob), typeDiscriminator: "restore")]
+    [JsonDerivedType(typeof(ShrinkJob), typeDiscriminator: "shrink")]
+    [JsonDerivedType(typeof(CopyJob), typeDiscriminator: "copy")]
     public class Job
     {
         public enum JobTypes
@@ -31,7 +34,7 @@ namespace DBTools
 
         public static List<string> GetTaskDescriptions(JobTypes jobType)
         {
-            List<string> taskDescriptions = new List<string>();
+            List<string> taskDescriptions = [];
 
             switch (jobType)
             {
@@ -85,19 +88,19 @@ namespace DBTools
             return value;
         }
 
-        [XmlElement("key")]
+        [JsonRequired]
         public string Key { get; set; }
 
-        [XmlElement("database")]
+        [JsonRequired]
         public string Database { get; set; }
 
-        [XmlElement("type")]
+        [JsonRequired]
         public virtual JobTypes Type { get; set; }
 
-        [XmlElement("task")]
+        [JsonRequired]
         public JobTasks Task { get; set; }
 
-        [XmlElement("path")]
+        [JsonRequired]
         public string Path { get; set; }
     }
 }

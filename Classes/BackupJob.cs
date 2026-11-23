@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Xml.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace DBTools
 {
@@ -30,16 +29,16 @@ namespace DBTools
             }
         }
 
-        [XmlElement("backup_type")]
+        [JsonRequired]
         public BackupTypes BackupType { get; set; }
 
-        [XmlElement("backup_option")]
+        [JsonRequired]
         public BackupOverwriteOptions BackupOption { get; set; }
 
-        [XmlElement("rolling_backups")]
+        [JsonRequired]
         public bool RollingBackups { get; set; }
 
-        [XmlElement("max_backups")]
+        [JsonRequired]
         public int MaxBackups { get; set; }
     }
 }

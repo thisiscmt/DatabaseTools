@@ -1,13 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
+﻿using System.ComponentModel;
 using System.Text.RegularExpressions;
-using System.Windows.Forms;
-using Nini.Config;
 
 namespace DBTools
 {
@@ -18,21 +10,11 @@ namespace DBTools
         {
             InitializeComponent();
 
-            IConfig optionsSection;
-
             try
             {
                 this.Unload = false;
 
-                if (Program.ConfigFile.Configs["Options"] == null)
-                {
-                    optionsSection = Program.ConfigFile.Configs.Add("Options");
-                }
-                else
-                {
-                    optionsSection = Program.ConfigFile.Configs["Options"];
-                    txtMRULength.Text = optionsSection.GetString("MaxMRULength");
-                }
+                txtMRULength.Text = Program.AppConfig.MaxMRULength.ToString();
             }
             catch (Exception ex)
             {
@@ -45,17 +27,14 @@ namespace DBTools
         #region Command button event handlers
         private void cmdOK_Click(object sender, EventArgs e)
         {
-            IConfig optionsSection;
-
             try
             {
                 if (ValidInput())
                 {
-                    optionsSection = Program.ConfigFile.Configs["Options"];
-                    optionsSection.Set("MaxMRULength", int.Parse(txtMRULength.Text));
-                    Program.ConfigFile.Save();
+                    Program.AppConfig.MaxMRULength = int.Parse(txtMRULength.Text);
+                    Utility.SaveAppConfig();
 
-                    this.DialogResult = System.Windows.Forms.DialogResult.OK;
+                    this.DialogResult = DialogResult.OK;
                 }
             }
             catch (Exception ex)
@@ -68,7 +47,7 @@ namespace DBTools
         {
             try
             {
-                this.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+                this.DialogResult = DialogResult.Cancel;
             }
             catch (Exception ex)
             {
@@ -91,7 +70,7 @@ namespace DBTools
                     return false;
                 }
 
-                Regex maxMRUCheck = new Regex(@"^[0-9]+$");
+                Regex maxMRUCheck = new(@"^[0-9]+$");
                 if (!maxMRUCheck.IsMatch(txtMRULength.Text))
                 {
                     Utility.ShowError("You must specify only digits for the max MRU length.");
@@ -101,9 +80,9 @@ namespace DBTools
 
                 maxMRULength = int.Parse(txtMRULength.Text);
 
-                if (maxMRULength < 1 || maxMRULength > 12)
+                if (maxMRULength < 1 || maxMRULength > 30)
                 {
-                    Utility.ShowError("The max MRU length value must be between 1 and 16.");
+                    Utility.ShowError("The max MRU length value must be between 1 and 30.");
                     txtMRULength.Select();
                     return false;
                 }
@@ -119,6 +98,7 @@ namespace DBTools
         #endregion
 
         #region Properties
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool Unload { get; set; }
         #endregion
     }

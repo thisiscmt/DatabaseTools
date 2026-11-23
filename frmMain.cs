@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Windows.Forms;
-using System.IO;
-using System.Drawing;
-using System.Xml.Serialization;
-using Nini.Config;
+﻿using System.ComponentModel;
+using System.Text.Json;
 
 namespace DBTools
 {
@@ -13,7 +7,7 @@ namespace DBTools
     {
         JobType = 1,
         Task = 2,
-        Path = 3,
+        Path = 3,   
         Details = 4
     }
 
@@ -29,14 +23,13 @@ namespace DBTools
 
         private bool m_cancel;  // Indicates job execution has been cancelled
 
-        private const string DEFAULT_JOB_FILE = "dbjobs.xml";
+        private JsonSerializerOptions m_serializerOptions = new() { WriteIndented = true };
 
-        private const int MRU_START_INDEX = 5;  // The starting point of the MRU section 
-                                                // in the File menu
+        private const string DEFAULT_JOB_FILE = "dbjobs.json";
 
-        private const int MRU_ITEM_MAX_LENGTH = 60;  // The max number of characters in 
-                                                     // an MRU file path that will be shown 
-                                                     // before it is abbreviated
+        private const int MRU_START_INDEX = 5;  // The starting point of the MRU section in the File menu
+
+        private const int MRU_ITEM_MAX_LENGTH = 60;  // The max number of characters in an MRU file path that will be shown before it is abbreviated
 
         private const int MRU_DEFAULT_LIST_MAX_LENGTH = 8;
 
@@ -100,20 +93,7 @@ namespace DBTools
 
             try
             {
-                if (Program.CurrentServer != null)
-                {
-                    Program.CurrentServer.ConnectionContext.Disconnect();
-                }
-
-                if (!File.Exists(Program.ConfigFile.SavePath))
-                {
-                    File.CreateText(Program.ConfigFile.SavePath).Close();
-                }
-
-                if (Program.ConfigFile.Configs["MRU"] == null)
-                {
-                    Program.ConfigFile.Configs.Add("MRU");
-                }
+                Program.CurrentServer?.ConnectionContext.Disconnect();
 
                 if (mnuSaveOnExit.Checked)
                 {
@@ -124,17 +104,17 @@ namespace DBTools
                     saveOnExit = "Off";
                 }
 
-                Program.ConfigFile.Configs["MRU"].Set("SaveOnExit", saveOnExit);
-                Program.ConfigFile.Save();
+                Program.AppConfig.SaveOnExit = saveOnExit;
 
                 if (mnuSaveOnExit.Checked)
                 {
                     mnuSave_Click("FormClosed", null);
                 }
 
-                // We need to run this after the current file is saved, if it needs 
-                // to be saved, so that file can be included in the MRU list
+                // We need to run this after the current job file is saved, if the save on exit option is enabled, so that file can be included in the MRU list
                 SaveMRUFileEntries();
+
+                Utility.SaveAppConfig();
             }
             catch
             {
@@ -156,7 +136,7 @@ namespace DBTools
                     return;
                 }
 
-                filter = "Job Files (*.xml)|*.xml|All Files (*.*)|*.*";
+                filter = "Job Files (*.json)|*.json|All Files (*.*)|*.*";
 
                 if (string.IsNullOrEmpty(Program.CurrentJobFile))
                 {
@@ -167,7 +147,7 @@ namespace DBTools
                     fileName = "";
                 }
 
-                filePath = Utility.BrowseForFileOpen("xml", filter, fileName);
+                filePath = Utility.BrowseForFileOpen("json", filter, fileName);
 
                 if (LoadJobs(filePath))
                 {
@@ -215,8 +195,8 @@ namespace DBTools
                     // assume the FormClosed event is the caller, so skip the prompt
                     if (sender.ToString() == "Save")
                     {
-                        filter = "Job Files (*.xml)|*.xml|All Files (*.*)|*.*";
-                        filePath = Utility.BrowseForFileSave("xml", filter, Path.GetFileName(filePath));
+                        filter = "Job Files (*.json)|*.json|All Files (*.*)|*.*";
+                        filePath = Utility.BrowseForFileSave("json", filter, Path.GetFileName(filePath));
                     }
 
                     if (SaveJobs(filePath))
@@ -278,7 +258,7 @@ namespace DBTools
 
         private void mnuAddBackupJob_Click(object sender, EventArgs e)
         {
-            frmBackupJob backupForm = null;
+            BackupJobForm backupForm = null;
 
             try
             {
@@ -287,7 +267,7 @@ namespace DBTools
                     return;
                 }
 
-                backupForm = new frmBackupJob();
+                backupForm = new BackupJobForm();
 
                 if (!backupForm.Unload)
                 {
@@ -300,10 +280,7 @@ namespace DBTools
             }
             finally
             {
-                if (backupForm != null)
-                {
-                    backupForm.Dispose();
-                }
+                backupForm?.Dispose();
             }
         }
 
@@ -331,10 +308,7 @@ namespace DBTools
             }
             finally
             {
-                if (restoreForm != null)
-                {
-                    restoreForm.Dispose();
-                }
+                restoreForm?.Dispose();
             }
         }
 
@@ -362,10 +336,7 @@ namespace DBTools
             }
             finally
             {
-                if (shrinkForm != null)
-                {
-                    shrinkForm.Dispose();
-                }
+                shrinkForm?.Dispose();
             }
         }
 
@@ -393,10 +364,7 @@ namespace DBTools
             }
             finally
             {
-                if (copyForm != null)
-                {
-                    copyForm.Dispose();
-                }
+                copyForm?.Dispose();
             }
         }
 
@@ -429,7 +397,7 @@ namespace DBTools
 
         private void mnuEditJob_Click(object sender, EventArgs e)
         {
-            frmBackupJob backupForm;
+            BackupJobForm backupForm;
             frmRestoreJob restoreForm;
             frmShrinkJob shrinkForm;
             frmCopyJob copyForm;
@@ -446,7 +414,7 @@ namespace DBTools
                     switch (((Job) li.Tag).Type)
                     {
                         case Job.JobTypes.Backup:
-                            backupForm = new frmBackupJob((BackupJob) li.Tag);
+                            backupForm = new BackupJobForm((BackupJob) li.Tag);
 
                             if (!backupForm.Unload)
                             {
@@ -525,7 +493,6 @@ namespace DBTools
         private void mnuStartJobs_Click(object sender, EventArgs e)
         {
             JobEngineParameters parms;
-            List<Job> jobs;
 
             try
             {
@@ -540,7 +507,7 @@ namespace DBTools
                     return;
                 }
 
-                jobs = new List<Job>();
+                List<Job> jobs = [];
                 foreach (ListViewItem li in lvwMain.Items)
                 {
                     jobs.Add((Job) li.Tag);
@@ -590,10 +557,7 @@ namespace DBTools
             }
             finally
             {
-                if (createBackupScriptForm != null)
-                {
-                    createBackupScriptForm.Dispose();
-                }
+                createBackupScriptForm?.Dispose();
             }
         }
 
@@ -616,10 +580,7 @@ namespace DBTools
             }
             finally
             {
-                if (logForm != null)
-                {
-                    logForm.Dispose();
-                }
+                logForm?.Dispose();
             }
         }
 
@@ -667,10 +628,7 @@ namespace DBTools
             }
             finally
             {
-                if (optionsForm != null)
-                {
-                    optionsForm.Dispose();
-                }
+                optionsForm?.Dispose();
             }
         }
 
@@ -694,10 +652,7 @@ namespace DBTools
             }
             finally
             {
-                if (aboutForm != null)
-                {
-                    aboutForm.Dispose();
-                }
+                aboutForm?.Dispose();
             }
         }
         #endregion
@@ -901,7 +856,7 @@ namespace DBTools
             {
                 bw = (BackgroundWorkerExt)sender;
                 parms = (JobEngineParameters)e.Argument;
-                this.m_jobEngine = new JobEngine(parms.CurrentServer, parms.CurrentUser);
+                this.m_jobEngine = new JobEngine(parms.CurrentServer);
                 this.m_jobEngine.JobProgress += new JobEngine.JobProgressEventHandler(m_jobEngine_JobProgress);
 
                 foreach (Job job in parms.JobList)
@@ -1090,21 +1045,15 @@ namespace DBTools
         #region Misc functions
         public void Initialize(string server)
         {
-            IConfig mruSection;
-
             try
             {
                 if (this.m_firstLogin)
                 {
                     lblStatus.Text = "Ready";
-                    mruSection = Program.ConfigFile.Configs["MRU"];
 
-                    if (mruSection != null)
+                    if (Program.AppConfig.SaveOnExit == "On")
                     {
-                        if (mruSection.GetString("SaveOnExit") != null && mruSection.GetString("SaveOnExit") == "On")
-                        {
-                            mnuSaveOnExit.Checked = true;
-                        }
+                        mnuSaveOnExit.Checked = true;
                     }
 
                     SetStatusBarServerName(server);
@@ -1123,10 +1072,9 @@ namespace DBTools
             lblServer.Text = " " + server + " ";
         }
 
-        public bool SaveJobToList(Job job, JobForm.JobFormActions action)
+        public bool SaveJobToList(Job job, JobFormActions action)
         {
             ListViewItem li;
-            string details = "";
             string key;
             bool retVal = false;
 
@@ -1137,7 +1085,7 @@ namespace DBTools
                     if (((Job)item.Tag).Type == Job.JobTypes.Backup && 
                         ((Job)item.Tag).Task == Job.JobTasks.SingleDatabase &&
                         item.Text.ToLower() == job.Database.ToLower() &&
-                        action == JobForm.JobFormActions.Add)
+                        action == JobFormActions.Add)
                     {
                         Utility.ShowError("A backup job for database '" + job.Database + "' has already been added.");
                         return false;
@@ -1146,7 +1094,7 @@ namespace DBTools
                     if (((Job)item.Tag).Type == Job.JobTypes.Restore &&
                         ((Job)item.Tag).Task == Job.JobTasks.SingleDatabase &&
                         item.Text.ToLower() == job.Database.ToLower() &&
-                        action == JobForm.JobFormActions.Add)
+                        action == JobFormActions.Add)
                     {
                         Utility.ShowError("A restore job for database '" + job.Database + "' has already been added.");
                         return false;
@@ -1155,16 +1103,16 @@ namespace DBTools
                     if (((Job)item.Tag).Type == Job.JobTypes.Shrink &&
                         ((Job)item.Tag).Task == Job.JobTasks.SingleDatabase &&
                         item.Text.ToLower() == job.Database.ToLower() &&
-                        action == JobForm.JobFormActions.Add)
+                        action == JobFormActions.Add)
                     {
                         Utility.ShowError("A shrink job for database '" + job.Database + "' has already been added.");
                         return false;
                     }
                 }
 
-                details = BuildDetailsValue(job);
+                string details = BuildDetailsValue(job);
 
-                if (action == JobForm.JobFormActions.Add)
+                if (action == JobFormActions.Add)
                 {
                     key = Utility.GenerateListItemKey();
                     job.Key = key;
@@ -1186,7 +1134,7 @@ namespace DBTools
                     li.SubItems.Add(details);
                     li.Tag = job;
                 }
-                else if (action == JobForm.JobFormActions.Edit)
+                else if (action == JobFormActions.Edit)
                 {
                     li = lvwMain.Items[job.Key];
                     li.Text = job.Database;
@@ -1257,8 +1205,6 @@ namespace DBTools
 
         private bool SaveJobs(string filePath)
         {
-            StreamWriter sw = null;
-            XmlSerializer xs;
             JobList jobList;
             bool retVal = false;
 
@@ -1273,9 +1219,8 @@ namespace DBTools
                         jobList.Jobs.Add((Job)li.Tag);
                     }
 
-                    sw = new StreamWriter(filePath, false);
-                    xs = new XmlSerializer(typeof(JobList), new Type[] { typeof(BackupJob), typeof(RestoreJob), typeof(ShrinkJob), typeof(CopyJob) });
-                    xs.Serialize(sw, jobList);
+                    string jsonString = JsonSerializer.Serialize(jobList, m_serializerOptions);
+                    File.WriteAllText(filePath, jsonString);
 
                     retVal = true;
                 }
@@ -1284,18 +1229,11 @@ namespace DBTools
             {
                 Utility.HandleException("frmMain", "SaveJobs", ex.Source, ex.Message, ex.InnerException);
             }
-            finally
-            {
-                if (sw != null)
-                {
-                    sw.Dispose();
-                }
-            }
 
             return retVal;
         }
 
-        private string BuildDetailsValue(Job job)
+        private static string BuildDetailsValue(Job job)
         {
             string details = "";
 
@@ -1317,11 +1255,11 @@ namespace DBTools
 
                         if (backupJob.BackupOption == BackupJob.BackupOverwriteOptions.Overwrite)
                         {
-                            details = details + ", Overwrite: Overwrite File";
+                            details += ", Overwrite: Overwrite File";
                         }
                         else
                         {
-                            details = details + ", Overwrite: Append to File";
+                            details += ", Overwrite: Append to File";
                         }
 
                         break;
@@ -1331,16 +1269,16 @@ namespace DBTools
 
                         if (restoreJob.ClearUsers)
                         {
-                            details = details + ", Clear users: Yes";
+                            details += ", Clear users: Yes";
                         }
                         else
                         {
-                            details = details + ", Clear users: No";
+                            details += ", Clear users: No";
                         }
 
                         if (restoreJob.Task == Job.JobTasks.ByDirectory)
                         {
-                            details = details + ", File extension: " + restoreJob.FileExtension;
+                            details += ", File extension: " + restoreJob.FileExtension;
                         }
 
                         break;
@@ -1360,7 +1298,7 @@ namespace DBTools
                             }
                             else
                             {
-                                details = details + ", Set to simple: Yes";
+                                details += ", Set to simple: Yes";
                             }
                         }
 
@@ -1372,7 +1310,7 @@ namespace DBTools
                             }
                             else
                             {
-                                details = details + ", Update indexes: Yes";
+                                details += ", Update indexes: Yes";
                             }
                         }
 
@@ -1384,7 +1322,7 @@ namespace DBTools
                             }
                             else
                             {
-                                details = details + ", File to shrink: " + shrinkJob.FileToShrink;
+                                details += ", File to shrink: " + shrinkJob.FileToShrink;
                             }
                         }
 
@@ -1410,42 +1348,33 @@ namespace DBTools
             ToolStripSeparator mnuSeparator;
             string filePath;
             int insertPoint = 0;
-            int maxMRULength;
             bool separatorAdded = false;
 
             try
             {
-                if (Program.ConfigFile.Configs["Options"] == null)
+                for (int i = 1; i < Program.AppConfig.MRUJobFiles.Length + 1; i++)
                 {
-                    maxMRULength = MRU_DEFAULT_LIST_MAX_LENGTH;
-                }
-                else
-                {
-                    maxMRULength = int.Parse(Program.ConfigFile.Configs["Options"].GetString("MaxMRULength", MRU_DEFAULT_LIST_MAX_LENGTH.ToString()));
-                }
-
-                for (int i = 1; i < maxMRULength + 1; i++)
-                {
-                    if (Program.ConfigFile.Configs["File" + i.ToString()] != null)
+                    if (!separatorAdded)
                     {
-                        if (!separatorAdded)
+                        mnuSeparator = new()
                         {
-                            mnuSeparator = new ToolStripSeparator();
-                            mnuSeparator.Name = "MRUSeparator";
-                            mnuFile.DropDownItems.Insert(MRU_START_INDEX - 1, mnuSeparator);
-                            separatorAdded = true;
-                        }
-
-                        filePath = Program.ConfigFile.Configs["File" + i.ToString()].GetString("Path");
-                        mnuMRUFile = new ToolStripMenuItem(Utility.AbbreviatePath(filePath, MRU_ITEM_MAX_LENGTH), 
-                                                           null, 
-                                                           new EventHandler(mnuFileMRU_Click), 
-                                                           filePath);
-                        mnuMRUFile.ToolTipText = filePath;
-
-                        mnuFile.DropDownItems.Insert(MRU_START_INDEX + insertPoint, mnuMRUFile);
-                        insertPoint += 1;
+                            Name = "MRUSeparator"
+                        };
+                        mnuFile.DropDownItems.Insert(MRU_START_INDEX - 1, mnuSeparator);
+                        separatorAdded = true;
                     }
+
+                    filePath = Program.AppConfig.MRUJobFiles[i - 1];
+                    mnuMRUFile = new ToolStripMenuItem(Utility.AbbreviatePath(filePath, MRU_ITEM_MAX_LENGTH),
+                                                       null,
+                                                       new EventHandler(mnuFileMRU_Click),
+                                                       filePath)
+                    {
+                        ToolTipText = filePath
+                    };
+
+                    mnuFile.DropDownItems.Insert(MRU_START_INDEX + insertPoint, mnuMRUFile);
+                    insertPoint += 1;
                 }
             }
             catch (Exception ex)
@@ -1456,46 +1385,31 @@ namespace DBTools
 
         private void SaveMRUFileEntries()
         {
-            IConfig section;
             string itemName;
             bool done = false;
-            int count;
             int id = 1;
             int index = MRU_START_INDEX;
+            IEnumerable<string> newMRUList = [];
 
             try
             {
-                count = Program.ConfigFile.Configs.Count;
-
-                // Looping through the config section in reverse order is the 
-                // cleanest way to remove entries
-                for (int i = count - 1; i > -1; i--)
-                {
-                    if (Program.ConfigFile.Configs[i].Name.StartsWith("File"))
-                    {
-                        Program.ConfigFile.Configs.RemoveAt(i);
-                        Program.ConfigFile.Save();
-                    }
-                }
-
                 while (!done)
                 {
                     itemName = mnuFile.DropDownItems[index].Name;
 
                     if (itemName != "ExitSeparator" && itemName != "mnuExit")
                     {
-                        section = Program.ConfigFile.Configs.Add("File" + id.ToString());
-                        section.Set("Path", itemName);
+                        newMRUList = newMRUList.Append(itemName);
                         id += 1;
                         index += 1;
-
-                        Program.ConfigFile.Save();
                     }
                     else
                     {
                         done = true;
                     }
                 }
+
+                Program.AppConfig.MRUJobFiles = [.. newMRUList];
             }
             catch (Exception ex)
             {
@@ -1513,27 +1427,31 @@ namespace DBTools
 
             try
             {
-                if (Program.ConfigFile.Configs["Options"] == null)
+                if (Program.AppConfig.MaxMRULength == 0)
                 {
                     maxMRULength = MRU_DEFAULT_LIST_MAX_LENGTH;
                 }
                 else
                 {
-                    maxMRULength = int.Parse(Program.ConfigFile.Configs["Options"].GetString("MaxMRULength", MRU_DEFAULT_LIST_MAX_LENGTH.ToString()));
+                    maxMRULength = Program.AppConfig.MaxMRULength;
                 }
 
                 mnuMRUFile = new ToolStripMenuItem(Utility.AbbreviatePath(filePath, MRU_ITEM_MAX_LENGTH),
                                                    null,
-                                                   new EventHandler(mnuFileMRU_Click), 
-                                                   filePath);
-                mnuMRUFile.ToolTipText = filePath;
+                                                   new EventHandler(mnuFileMRU_Click),
+                                                   filePath)
+                {
+                    ToolTipText = filePath
+                };
 
                 if (mnuFile.DropDownItems[filePath] == null)
                 {
                     if (mnuFile.DropDownItems["MRUSeparator"] == null)
                     {
-                        mnuSeparator = new ToolStripSeparator();
-                        mnuSeparator.Name = "MRUSeparator";
+                        mnuSeparator = new ToolStripSeparator
+                        {
+                            Name = "MRUSeparator"
+                        };
                         mnuFile.DropDownItems.Insert(MRU_START_INDEX - 1, mnuSeparator);
                     }
 
@@ -1569,6 +1487,7 @@ namespace DBTools
         #endregion
 
         #region Properties
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool Unload { get; set; }
         #endregion
     }

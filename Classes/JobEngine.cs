@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.ComponentModel;
-using System.IO;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using System.Data;
 using Microsoft.SqlServer.Management.Smo;
 
@@ -14,7 +7,6 @@ namespace DBTools
     internal class JobEngine
     {
         private Server m_server;
-        private User m_user;
         private Backup m_backup;
         private Restore m_restore;
         private List<string> m_jobTracker;
@@ -27,19 +19,24 @@ namespace DBTools
         public event JobProgressEventHandler JobProgress;
 
         #region Constructor
-        public JobEngine(Server server, User user)
+        public JobEngine(Server server)
         {
             this.m_server = server;
-            this.m_user = user;
-            this.m_jobTracker = new List<string>();
+            this.m_jobTracker = [];
             this.m_error = false;
             this.m_cancel = false;
             this.m_curDatabase = "";
-            this.m_backup = new Backup();
-            this.m_backup.PercentCompleteNotification = 2;
+
+            this.m_backup = new Backup
+            {
+                PercentCompleteNotification = 2
+            };
             this.m_backup.PercentComplete += new PercentCompleteEventHandler(m_backup_PercentComplete);
-            this.m_restore = new Restore();
-            this.m_restore.PercentCompleteNotification = 2;
+
+            this.m_restore = new Restore
+            {
+                PercentCompleteNotification = 2
+            };
             this.m_restore.PercentComplete += new PercentCompleteEventHandler(m_restore_PercentComplete);
         }
         #endregion
@@ -56,9 +53,11 @@ namespace DBTools
             bool okToBackUp;
             bool backupOccurred = false;
 
-            jobEventArgs = new JobEventArgs();
-            jobEventArgs.Action = JobEventArgs.StatusAction.SetProgressMax;
-            jobEventArgs.Maximum = 100;
+            jobEventArgs = new JobEventArgs
+            {
+                Action = JobEventArgs.StatusAction.SetProgressMax,
+                Maximum = 100
+            };
             RaiseJobProgressEvent(jobEventArgs);
             this.m_curJobType = Job.JobTypes.Backup;
 
@@ -72,7 +71,7 @@ namespace DBTools
 
                 if (job.RollingBackups)
                 {
-                    DirectoryInfo backupDir = new DirectoryInfo(job.Path);
+                    DirectoryInfo backupDir = new(job.Path);
                     var existingBackups = backupDir.GetFiles($"{job.Database}*.bak").OrderBy(x => x.Name);
 
                     if (job.MaxBackups > 0 && existingBackups.Count() >= job.MaxBackups)
@@ -118,23 +117,21 @@ namespace DBTools
                             okToBackUp = true;
                             break;
                         case Job.JobTasks.ByWildcard:
-                            if (job.Database.StartsWith("*"))
+                            if (job.Database.StartsWith('*'))
                             {
-                                searchStr = ".*" + job.Database.Substring(1, job.Database.Length - 1) + "$";
+                                searchStr = string.Concat(".*", job.Database.AsSpan(1, job.Database.Length - 1), "$");
                             }
-                            else if (job.Database.EndsWith("*"))
+                            else if (job.Database.EndsWith('*'))
                             {
-                                searchStr = "^" + job.Database.Substring(0, job.Database.Length - 1) + ".*";
+                                searchStr = string.Concat("^", job.Database.AsSpan(0, job.Database.Length - 1), ".*");
                             }
                             else if (job.Database.Contains('*'))
                             {
-                                // The user isn't allowed to input a search string 
-                                // on the backup form with more than one wildcard, 
-                                // so we don't have to worry about that here
+                                // The user isn't allowed to input a search string on the backup form with more than one wildcard, so we don't have to worry about that here
                                 mark = job.Database.IndexOf('*');
 
-                                frontPart = job.Database.Substring(0, mark);
-                                backPart = job.Database.Substring(mark + 1, job.Database.Length - mark -1);
+                                frontPart = job.Database[..mark];
+                                backPart = job.Database[(mark + 1)..];
                                 searchStr = "^" + frontPart + "(.*)" + backPart + "$";
                             }
                             else
@@ -190,9 +187,11 @@ namespace DBTools
             JobEventArgs jobEventArgs;
             string dirPath;
 
-            jobEventArgs = new JobEventArgs();
-            jobEventArgs.Action = JobEventArgs.StatusAction.SetProgressMax;
-            jobEventArgs.Maximum = 100;
+            jobEventArgs = new JobEventArgs
+            {
+                Action = JobEventArgs.StatusAction.SetProgressMax,
+                Maximum = 100
+            };
             RaiseJobProgressEvent(jobEventArgs);
             this.m_curJobType = Job.JobTypes.Restore;
 
@@ -254,9 +253,11 @@ namespace DBTools
             bool okToShrink;
             bool shrinkOccurred = false;
 
-            jobEventArgs = new JobEventArgs();
-            jobEventArgs.Action = JobEventArgs.StatusAction.SetProgressMax;
-            jobEventArgs.Maximum = 100;
+            jobEventArgs = new JobEventArgs
+            {
+                Action = JobEventArgs.StatusAction.SetProgressMax,
+                Maximum = 100
+            };
             RaiseJobProgressEvent(jobEventArgs);
             this.m_curJobType = Job.JobTypes.Shrink;
 
@@ -298,23 +299,21 @@ namespace DBTools
                             okToShrink = true;
                             break;
                         case Job.JobTasks.ByWildcard:
-                            if (job.Database.StartsWith("*"))
+                            if (job.Database.StartsWith('*'))
                             {
-                                searchStr = ".*" + job.Database.Substring(1, job.Database.Length - 1) + "$";
+                                searchStr = string.Concat(".*", job.Database.AsSpan(1, job.Database.Length - 1), "$");
                             }
-                            else if (job.Database.EndsWith("*"))
+                            else if (job.Database.EndsWith('*'))
                             {
-                                searchStr = "^" + job.Database.Substring(0, job.Database.Length - 1) + ".*";
+                                searchStr = string.Concat("^", job.Database.AsSpan(0, job.Database.Length - 1), ".*");
                             }
                             else if (job.Database.Contains('*'))
                             {
-                                // The user isn't allowed to input a search string 
-                                // on the shrink form with more than one wildcard, 
-                                // so we don't have to worry about that here
+                                // The user isn't allowed to input a search string on the shrink form with more than one wildcard, so we don't have to worry about that here
                                 mark = job.Database.IndexOf('*');
 
-                                frontPart = job.Database.Substring(0, mark);
-                                backPart = job.Database.Substring(mark + 1, job.Database.Length - mark - 1);
+                                frontPart = job.Database[..mark];
+                                backPart = job.Database[(mark + 1)..];
                                 searchStr = "^" + frontPart + "(.*)" + backPart + "$";
                             }
                             else
@@ -347,7 +346,7 @@ namespace DBTools
                     if (this.m_cancel)
                     {
                         msg = "The shrink of database '" + db.Name + "' did not complete due to the following error:" + Environment.NewLine + Environment.NewLine;
-                        msg = msg + "The operation was cancelled by the user.";
+                        msg += "The operation was cancelled by the user.";
                         Utility.WriteToSystemLog("", msg);
                         return false;
                     }
@@ -372,11 +371,13 @@ namespace DBTools
 
         public bool RunCopyJob(CopyJob job)
         {
-            JobEventArgs jobEventArgs = new JobEventArgs();
-
-            jobEventArgs.Action = JobEventArgs.StatusAction.SetProgressMax;
-            jobEventArgs.Maximum = 100;
+            JobEventArgs jobEventArgs = new()
+            {
+                Action = JobEventArgs.StatusAction.SetProgressMax,
+                Maximum = 100
+            };
             RaiseJobProgressEvent(jobEventArgs);
+
             jobEventArgs.Action = JobEventArgs.StatusAction.MessageAndClearProgress;
             jobEventArgs.Message = "Copying database '" + job.Database + "' ...";
             RaiseJobProgressEvent(jobEventArgs);
@@ -411,9 +412,11 @@ namespace DBTools
             }
             else
             {
-                JobEventArgs jobEventArgs = new JobEventArgs();
-                jobEventArgs.JobType = this.m_curJobType;
-                jobEventArgs.Action = JobEventArgs.StatusAction.IncrementProgress;
+                JobEventArgs jobEventArgs = new()
+                {
+                    JobType = this.m_curJobType,
+                    Action = JobEventArgs.StatusAction.IncrementProgress
+                };
 
                 if (jobEventArgs.JobType == Job.JobTypes.Copy)
                 {
@@ -436,9 +439,11 @@ namespace DBTools
             }
             else
             {
-                JobEventArgs jobEventArgs = new JobEventArgs();
-                jobEventArgs.JobType = this.m_curJobType;
-                jobEventArgs.Action = JobEventArgs.StatusAction.IncrementProgress;
+                JobEventArgs jobEventArgs = new()
+                {
+                    JobType = this.m_curJobType,
+                    Action = JobEventArgs.StatusAction.IncrementProgress
+                };
 
                 if (jobEventArgs.JobType == Job.JobTypes.Copy)
                 {
@@ -460,10 +465,9 @@ namespace DBTools
                                     BackupJob.BackupOverwriteOptions overwriteOpt)
         {
             string sql;
-            string retVal = "";
+            string retVal;
 
-            // If xp_cmdshell is enabled, try to verify the specified directory
-            // exists on the server
+            // If xp_cmdshell is enabled, try to verify the specified directory exists on the server
             if (this.m_server.Configuration.XPCmdShellEnabled.RunValue == 1)
             {
                 sql = "exec xp_cmdshell 'chdir \"" + Path.GetDirectoryName(filePath) + "\"'";
@@ -472,7 +476,7 @@ namespace DBTools
                 if (retVal != "")
                 {
                     sql = "exec xp_cmdshell 'mkdir \"" + Path.GetDirectoryName(filePath) + "\"'";
-                    retVal = this.m_server.ConnectionContext.ExecuteScalar(sql).ToString();
+                    this.m_server.ConnectionContext.ExecuteScalar(sql).ToString();
                 }
             }
     
@@ -589,16 +593,12 @@ namespace DBTools
                 }
 
                 this.m_server.Databases.Refresh();
-                if (this.m_server.Databases[dbName] != null)
-                {
-                    this.m_server.Databases[dbName].Drop();
-                }
+                this.m_server.Databases[dbName]?.Drop();
 
                 this.m_restore.SqlRestore(this.m_server);
                 this.m_server.Databases.Refresh();
 
-                // Change logical file names so they match the actual database 
-                // name, if needed
+                // Change logical file names so they match the actual database name, if needed
                 for (int i = 0; i < this.m_server.Databases[dbName].FileGroups[0].Files.Count; i++)
                 {
                     df = this.m_server.Databases[dbName].FileGroups[0].Files[i];
@@ -627,10 +627,7 @@ namespace DBTools
             }
             finally
             {
-                if (fileList != null)
-                {
-                    fileList.Dispose();
-                }
+                fileList?.Dispose();
             }
 
             return retVal;
@@ -685,9 +682,11 @@ namespace DBTools
 
             if (updateIndexes)
             {
-                jobEventArgs = new JobEventArgs();
-                jobEventArgs.Action = JobEventArgs.StatusAction.MessageOnly;
-                jobEventArgs.Message = "Updating indexes in database '" + dbName + "' ...";
+                jobEventArgs = new JobEventArgs
+                {
+                    Action = JobEventArgs.StatusAction.MessageOnly,
+                    Message = "Updating indexes in database '" + dbName + "' ..."
+                };
                 RaiseJobProgressEvent(jobEventArgs);
                 
                 UpdateIndexes(dbName);
@@ -814,7 +813,7 @@ namespace DBTools
 
             foreach (Table table in db.Tables)
             {
-                foreach (Index idx in table.Indexes)
+                foreach (Microsoft.SqlServer.Management.Smo.Index idx in table.Indexes)
                 {
                     idx.OnlineIndexOperation = true;
                     dt = idx.EnumFragmentation();
@@ -833,20 +832,12 @@ namespace DBTools
                 }
             }
 
-            if (dt != null)
-            {
-                dt.Dispose();
-            }
+            dt?.Dispose();
         }
 
         private void RaiseJobProgressEvent(JobEventArgs e)
         {
-            var handler = this.JobProgress;
-
-            if (handler != null)
-            {
-                handler(this, e);
-            }
+            this.JobProgress?.Invoke(this, e);
         }
         #endregion
 

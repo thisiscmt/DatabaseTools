@@ -1,19 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
-using System.IO.Compression;
-using System.Windows.Forms;
-using System.Drawing;
-using System.Xml.Serialization;
+﻿using System.IO.Compression;
 using System.Net;
+using System.Text.Json;
 
 namespace DBTools
 {
     internal static class Utility
     {
         private const string SMO_ERROR_PREFIX_1 = "System.Data.SqlClient.SqlError:";
+
+        private static readonly JsonSerializerOptions m_serializerOptions = new() { WriteIndented = true };
 
         #region Public functions
         /// <summary>
@@ -23,7 +18,7 @@ namespace DBTools
         /// <returns>A description of the size number in KB, MB, or GB, whichever best matches its value.</returns>
         public static string FormatSize(long size)
         {
-            string sizeDesc = "";
+            string sizeDesc;
 
             if (size < 1024)
             {
@@ -61,22 +56,20 @@ namespace DBTools
             }
             else
             {
-                // To shorten the path we remove the part for the file's parent 
-                // directory. We need to check for a UNC path since we may only 
-                // want to take the first two chars to build the new path rather 
-                // than the first three for a regular drive root
+                // To shorten the path we remove the part for the file's parent directory. We need to check for a UNC path since we may only 
+                // want to take the first two chars to build the new path rather than the first three for a regular drive root.
                 if (path.StartsWith("\\"))
                 {
                     newPath = "\\\\...\\" + Path.GetFileName(path);
                 }
                 else
                 {
-                    newPath = path.Substring(0, 3) + "...\\" + Path.GetFileName(path);
+                    newPath = string.Concat(path.AsSpan(0, 3), "...\\", Path.GetFileName(path));
                 }
 
                 if (newPath.Length > maxLength)
                 {
-                    newPath = newPath.Substring(0, maxLength);
+                    newPath = newPath[..maxLength];
                 }
             }
 
@@ -98,7 +91,7 @@ namespace DBTools
             // Remove the instance name if there is one
             if (server.Contains("\\"))
             {
-                server = server.Substring(0, server.IndexOf('\\'));
+                server = server[..server.IndexOf('\\')];
             }
 
             host = Dns.GetHostEntry(Dns.GetHostName());
@@ -131,14 +124,16 @@ namespace DBTools
 
             try
             {
-                openDialog = new OpenFileDialog();
-                openDialog.DefaultExt = extension;
-                openDialog.Filter = filter;
-                openDialog.Title = "Open File";
-                openDialog.CheckFileExists = fileExists;
-                openDialog.CheckPathExists = true;
-                openDialog.ShowReadOnly = false;
-                openDialog.FileName = fileName;
+                openDialog = new OpenFileDialog
+                {
+                    DefaultExt = extension,
+                    Filter = filter,
+                    Title = "Open File",
+                    CheckFileExists = fileExists,
+                    CheckPathExists = true,
+                    ShowReadOnly = false,
+                    FileName = fileName
+                };
 
                 if (openDialog.ShowDialog() == DialogResult.OK)
                 {
@@ -151,10 +146,7 @@ namespace DBTools
             }
             finally
             {
-                if (openDialog != null)
-                {
-                    openDialog.Dispose();
-                }
+                openDialog?.Dispose();
             }
 
             return filePath;
@@ -167,13 +159,15 @@ namespace DBTools
 
             try
             {
-                saveDialog = new SaveFileDialog();
-                saveDialog.DefaultExt = extension;
-                saveDialog.Filter = filter;
-                saveDialog.Title = "Save File";
-                saveDialog.CheckFileExists = false;
-                saveDialog.CheckPathExists = false;
-                saveDialog.FileName = defaultFile;
+                saveDialog = new SaveFileDialog
+                {
+                    DefaultExt = extension,
+                    Filter = filter,
+                    Title = "Save File",
+                    CheckFileExists = false,
+                    CheckPathExists = false,
+                    FileName = defaultFile
+                };
 
                 if (defaultDir != "")
                 {
@@ -191,10 +185,7 @@ namespace DBTools
             }
             finally
             {
-                if (saveDialog != null)
-                {
-                    saveDialog.Dispose();
-                }
+                saveDialog?.Dispose();
             }
 
             return filePath;
@@ -202,7 +193,7 @@ namespace DBTools
 
         public static string ExtractFilesFromZipArchive(string filePath)
         {
-            string tempPath = Path.Combine(Environment.SystemDirectory.Substring(0, 3), Path.GetRandomFileName());
+            string tempPath = Path.Combine(Environment.SystemDirectory[..3], Path.GetRandomFileName());
             ZipFile.ExtractToDirectory(filePath, tempPath);
 
             return tempPath;
@@ -220,11 +211,11 @@ namespace DBTools
             {
                 if (!File.Exists(jobFilePath))
                 {
-                    Utility.WriteToSystemLog("", "Unable to find file '" + jobFilePath + "'. No jobs have been run.");
+                    WriteToSystemLog("", "Unable to find file '" + jobFilePath + "'. No jobs have been run.");
                     return;
                 }
 
-                jobEngine = new JobEngine(Program.CurrentServer, Program.CurrentUser);
+                jobEngine = new JobEngine(Program.CurrentServer);
                 jobList = GetJobList(jobFilePath);
 
                 if (jobList != null)
@@ -271,12 +262,12 @@ namespace DBTools
 
                     if (jobEngine.Error)
                     {
-                        Utility.WriteToSystemLog("", jobEngine.GetJobTracker());
+                        WriteToSystemLog("", jobEngine.GetJobTracker());
                     }
                     else
                     {
                         msg = "Database jobs in file '" + jobFilePath + "' were completed successfully.";
-                        Utility.ShowMessage(msg);
+                        ShowMessage(msg);
                     }
                 }
             }
@@ -291,35 +282,22 @@ namespace DBTools
                     msg = ex.Message + Environment.NewLine + ex.InnerException.Message;
                 }
 
-                Utility.WriteToSystemLog(dbName, msg);
+                WriteToSystemLog(dbName, msg);
             }
         }
 
         public static JobList GetJobList(string filePath)
         {
-            StreamReader sr = null;
-            XmlSerializer xs;
-            JobList jobList = null;
-
-            try
-            {
-                sr = new StreamReader(filePath);
-                xs = new XmlSerializer(typeof(JobList), new Type[] { typeof(BackupJob), typeof(RestoreJob), typeof(ShrinkJob), typeof(CopyJob) });
-                jobList = (JobList)xs.Deserialize(sr);
-            }
-            catch
-            {
-                throw;
-            }
-            finally
-            {
-                if (sr != null)
-                {
-                    sr.Dispose();
-                }
-            }
+            string jsonString = File.ReadAllText(filePath);
+            var jobList = JsonSerializer.Deserialize<JobList>(jsonString);
 
             return jobList;
+        }
+
+        public static void SaveAppConfig()
+        {
+            string jsonString = JsonSerializer.Serialize(Program.AppConfig, m_serializerOptions);
+            File.WriteAllText(Program.AppConfigFilePath, jsonString);
         }
 
         public static string BuildMessage(Exception ex)
@@ -350,7 +328,7 @@ namespace DBTools
         {
             try
             {
-                RunWriteToSystemLog(dbName, new List<string> { msg });
+                RunWriteToSystemLog(dbName, [msg]);
             }
             catch (Exception ex)
             {
@@ -454,18 +432,18 @@ namespace DBTools
             try
             {
                 msg = "An application error occurred, the error information is as follows:" + Environment.NewLine + System.Environment.NewLine;
-                msg = msg + "Module: " + modName + Environment.NewLine;
-                msg = msg + "Procedure: " + procedure + Environment.NewLine;
-                msg = msg + "Source: " + source + Environment.NewLine + Environment.NewLine;
+                msg += "Module: " + modName + Environment.NewLine;
+                msg += "Procedure: " + procedure + Environment.NewLine;
+                msg += "Source: " + source + Environment.NewLine + Environment.NewLine;
 
                 if (ex == null)
                 {
-                    msg = msg + "Error Description: " + StripPrefixes(desc);
+                    msg += "Error Description: " + StripPrefixes(desc);
                 }
                 else
                 {
-                    msg = msg + "Error Description: " + StripPrefixes(desc) + Environment.NewLine + Environment.NewLine;
-                    msg = msg + StripPrefixes(ex.Message);
+                    msg += "Error Description: " + StripPrefixes(desc) + Environment.NewLine + Environment.NewLine;
+                    msg += StripPrefixes(ex.Message);
                 }
 
                 if (showMsgBox && !Program.SilentExecution)
@@ -488,13 +466,13 @@ namespace DBTools
         #region Private functions
         private static void RunWriteToSystemLog(string dbName, IEnumerable<string> msgs)
         {
-            TextWriter sysLog = null;
+            StreamWriter sysLog = null;
             string[] subStrs;
             string newMsg;
 
             try
             {
-                if (msgs.Count() > 0)
+                if (msgs.Any())
                 {
                     if (File.Exists(Program.UserDataPath + "\\" + Program.SYSTEM_LOG_FILE))
                     {
@@ -508,7 +486,7 @@ namespace DBTools
                     foreach (string msg in msgs)
                     {
                         newMsg = msg.Replace(Environment.NewLine + Environment.NewLine, Environment.NewLine);
-                        subStrs = newMsg.Split(new string[] { System.Environment.NewLine }, StringSplitOptions.None);
+                        subStrs = newMsg.Split([System.Environment.NewLine], StringSplitOptions.None);
 
                         for (int i = 0; i < subStrs.Length; i++)
                         {
@@ -532,10 +510,7 @@ namespace DBTools
             }
             finally
             {
-                if (sysLog != null)
-                {
-                    sysLog.Dispose();
-                }
+                sysLog?.Dispose();
             }
         }
         #endregion

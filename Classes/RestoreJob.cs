@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Xml.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace DBTools
 {
@@ -18,13 +17,13 @@ namespace DBTools
             }
         }
 
-        [XmlElement("restore_position")]
+        [JsonRequired]
         public int RestorePosition { get; set; }
 
-        [XmlElement("clear_users")]
+        [JsonRequired]
         public bool ClearUsers { get; set; }
 
-        [XmlElement("file_extension")]
+        [JsonRequired]
         public string FileExtension { get; set; }
     }
 }

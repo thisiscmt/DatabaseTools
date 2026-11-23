@@ -1,21 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
-using System.IO;
+﻿using System.ComponentModel;
 
 namespace DBTools
 {
-    public partial class frmBackupJob : JobForm
+    public partial class BackupJobForm : Form
     {
         private string m_key;
+        private BackupJob m_job = null;
 
         #region Form event handlers
-        public frmBackupJob()
+        public BackupJobForm()
         {
             InitializeComponent();
 
@@ -32,26 +25,31 @@ namespace DBTools
             }
             catch (Exception ex)
             {
-                this.Unload = true;
                 Utility.HandleException("frmBackupJob", "New", ex.Source, ex.Message, ex.InnerException);
+                this.Unload = true;
             }
         }
 
-        public frmBackupJob(BackupJob job)
+        public BackupJobForm(BackupJob job)
         {
             InitializeComponent();
 
             try
             {
+                this.m_job = job;
                 this.Action = JobFormActions.Edit;
                 this.Text = JobFormActions.Edit.ToString() + " Backup Job";
                 this.m_key = job.Key;
                 cmbBackupTask.Items.AddRange(Job.GetTaskDescriptions(Job.JobTypes.Backup).ToArray());
                 cmbBackupTask.SelectedItem = job.Task.TaskDescription();
-                cmbDatabase.Text = job.Database;
                 txtBackupPath.Text = job.Path;
                 chkUpdate.Enabled = false;
-                
+
+                if (job.Task == Job.JobTasks.SingleDatabase || job.Task == Job.JobTasks.ByWildcard)
+                {
+                    cmbDatabase.Text = job.Database;
+                }
+
                 if (((BackupJob) job).BackupType == BackupJob.BackupTypes.Complete)
                 {
                     optComplete.Checked = true;
@@ -74,8 +72,8 @@ namespace DBTools
             }
             catch (Exception ex)
             {
-                this.Unload = true;
                 Utility.HandleException("frmBackupJob", "New", ex.Source, ex.Message, ex.InnerException);
+                this.Unload = true;
             }
         }
         #endregion
@@ -89,11 +87,21 @@ namespace DBTools
             {
                 if (ValidInput())
                 {
-                    job = new BackupJob();
-                    job.Key = this.m_key;
-                    job.Task = Job.GetTaskValue(cmbBackupTask.Text);
-                    job.Database = cmbDatabase.Text;
-                    job.Path = txtBackupPath.Text;
+                    job = new BackupJob
+                    {
+                        Key = this.m_key,
+                        Task = Job.GetTaskValue(cmbBackupTask.Text),
+                        Path = txtBackupPath.Text
+                    };
+
+                    if (job.Task == Job.JobTasks.SingleDatabase || job.Task == Job.JobTasks.ByWildcard)
+                    {
+                        job.Database = cmbDatabase.Text;
+                    }
+                    else
+                    {
+                        job.Database = "N/A";
+                    }
 
                     if (optComplete.Checked)
                     {
@@ -117,7 +125,7 @@ namespace DBTools
                     {
                         if (chkUpdate.Checked)
                         {
-                            this.DialogResult = System.Windows.Forms.DialogResult.OK;
+                            this.DialogResult = DialogResult.OK;
                         }
                         else
                         {
@@ -137,7 +145,7 @@ namespace DBTools
         {
             try
             {
-                this.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+                this.DialogResult = DialogResult.Cancel;
             }
             catch (Exception ex)
             {
@@ -165,7 +173,7 @@ namespace DBTools
 
                 if (!browseForm.Unload)
                 {
-                    if (browseForm.ShowDialog() != System.Windows.Forms.DialogResult.Cancel)
+                    if (browseForm.ShowDialog() != DialogResult.Cancel)
                     {
                         txtBackupPath.Text = browseForm.SelectedPath;
                     }
@@ -193,6 +201,7 @@ namespace DBTools
             try
             {
                 task = Job.GetTaskValue(cmbBackupTask.Text);
+                cmbDatabase.Text = "";
 
                 if (task == Job.JobTasks.SingleDatabase || task == Job.JobTasks.ByWildcard)
                 {
@@ -261,6 +270,11 @@ namespace DBTools
         {
             try
             {
+                if (this.m_job == null)
+                {
+                    txtBackupPath.Text = Program.CurrentServer.Settings.BackupDirectory + "\\" + cmbDatabase.Text + ".bak";
+                }
+
                 if (Program.CurrentServer.Databases[cmbDatabase.Text].RecoveryModel == Microsoft.SqlServer.Management.Smo.RecoveryModel.Simple)
                 {
                     optComplete.Checked = true;
@@ -349,6 +363,14 @@ namespace DBTools
                     return false;
                 }
             }
+        #endregion
+
+        #region Properties
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public JobFormActions Action { get; set; }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool Unload { get; set; }
         #endregion
     }
 }

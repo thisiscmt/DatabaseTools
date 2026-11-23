@@ -1,6 +1,4 @@
-﻿using System;
-using System.Windows.Forms;
-using System.IO;
+﻿using System.ComponentModel;
 
 namespace DBTools
 {
@@ -74,23 +72,11 @@ namespace DBTools
             }
         }
 
-        private void mnuPrintLog_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                // TODO: Implement system log printing
-            }
-            catch (Exception ex)
-            {
-                Utility.HandleException("frmSystemLog", "mnuPrintLog_Click", ex.Source, ex.Message, ex.InnerException);
-            }
-        }
-
         private void mnuClose_Click(object sender, EventArgs e)
         {
             try
             {
-                this.DialogResult = System.Windows.Forms.DialogResult.OK;
+                this.DialogResult = DialogResult.OK;
             }
             catch (Exception ex)
             {
@@ -108,7 +94,10 @@ namespace DBTools
         #endregion
 
         #region Properties
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string LogFilePath { get; set; }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool Unload { get; set; }
         #endregion
     }

@@ -1,18 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Microsoft.SqlServer.Management.Smo;
 using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
-using Microsoft.SqlServer.Management.Smo;
 
 namespace DBTools
 {
-    public partial class frmShrinkJob : JobForm
+    public partial class frmShrinkJob : Form
     {
         private string m_key;
+
         private string m_dbName;
 
         #region Form event handlers
@@ -34,8 +28,8 @@ namespace DBTools
             }
             catch (Exception ex)
             {
-                this.Unload = true;
                 Utility.HandleException("frmShrinkJob", "New", ex.Source, ex.Message, ex.InnerException);
+                this.Unload = true;
             }
         }
 
@@ -61,7 +55,7 @@ namespace DBTools
 
                 if (job.ShrinkFile)
                 {
-                    foreach (Object o in cmbDiskFile.Items)
+                    foreach (var o in cmbDiskFile.Items)
                     {
                         if (((ItemData) o).Name == job.FileToShrink)
                         {
@@ -78,16 +72,16 @@ namespace DBTools
                 lblRecoveryModel.Text = GetRecoveryModel();
                 cmbDatabase.Select();
 
-                // We don't store the name of the current database until everything 
-                // is loaded, because doing so would short-circuit the proper 
-                // initialization of the disk file combo box
+                // We don't store the name of the current database until everything is loaded, because doing so would short-circuit the proper initialization
+                // of the disk file combo box
                 this.m_dbName = job.Database;
+
                 this.Unload = false;
             }
             catch (Exception ex)
             {
-                this.Unload = true;
                 Utility.HandleException("frmShrinkJob", "New", ex.Source, ex.Message, ex.InnerException);
+                this.Unload = true;
             }
         }
         #endregion
@@ -103,13 +97,15 @@ namespace DBTools
                 if (ValidInput())
                 {
                     task = Job.GetTaskValue(cmbShrinkTask.Text);
-                    job = new ShrinkJob();
-                    job.Key = this.m_key;
-                    job.Task = task;
-                    job.RecoveryModel = lblRecoveryModel.Text;
-                    job.SetToSimple = chkSetToSimple.Checked;
-                    job.UpdateIndexes = chkUpdateIndexes.Checked;
-                    job.ShrinkFile = chkShrinkFile.Checked;
+                    job = new ShrinkJob
+                    {
+                        Key = this.m_key,
+                        Task = task,
+                        RecoveryModel = lblRecoveryModel.Text,
+                        SetToSimple = chkSetToSimple.Checked,
+                        UpdateIndexes = chkUpdateIndexes.Checked,
+                        ShrinkFile = chkShrinkFile.Checked
+                    };
 
                     if (chkShrinkFile.Checked)
                     {
@@ -131,7 +127,7 @@ namespace DBTools
                     {
                         if (chkUpdate.Checked)
                         {
-                            this.DialogResult = System.Windows.Forms.DialogResult.OK;
+                            this.DialogResult = DialogResult.OK;
                         }
                         else
                         {
@@ -458,6 +454,14 @@ namespace DBTools
 
             return retVal;
         }
+        #endregion
+
+        #region Properties
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public JobFormActions Action { get; set; }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool Unload { get; set; }
         #endregion
     }
 }

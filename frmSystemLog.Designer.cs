@@ -29,94 +29,84 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmSystemLog));
-            this.mnuMain = new System.Windows.Forms.MenuStrip();
-            this.mnuActions = new System.Windows.Forms.ToolStripMenuItem();
-            this.mnuClearLog = new System.Windows.Forms.ToolStripMenuItem();
-            this.mnuPrintLog = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.mnuClose = new System.Windows.Forms.ToolStripMenuItem();
-            this.txtLog = new System.Windows.Forms.TextBox();
-            this.mnuMain.SuspendLayout();
-            this.SuspendLayout();
+            mnuMain = new MenuStrip();
+            mnuActions = new ToolStripMenuItem();
+            mnuClearLog = new ToolStripMenuItem();
+            toolStripSeparator1 = new ToolStripSeparator();
+            mnuClose = new ToolStripMenuItem();
+            txtLog = new TextBox();
+            mnuMain.SuspendLayout();
+            SuspendLayout();
             // 
             // mnuMain
             // 
-            this.mnuMain.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.mnuActions});
-            this.mnuMain.Location = new System.Drawing.Point(0, 0);
-            this.mnuMain.Name = "mnuMain";
-            this.mnuMain.Size = new System.Drawing.Size(692, 24);
-            this.mnuMain.TabIndex = 0;
-            this.mnuMain.Text = "menuStrip1";
+            mnuMain.Items.AddRange(new ToolStripItem[] { mnuActions });
+            mnuMain.Location = new Point(0, 0);
+            mnuMain.Name = "mnuMain";
+            mnuMain.Padding = new Padding(7, 2, 0, 2);
+            mnuMain.Size = new Size(807, 24);
+            mnuMain.TabIndex = 0;
+            mnuMain.Text = "menuStrip1";
             // 
             // mnuActions
             // 
-            this.mnuActions.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.mnuClearLog,
-            this.mnuPrintLog,
-            this.toolStripSeparator1,
-            this.mnuClose});
-            this.mnuActions.Name = "mnuActions";
-            this.mnuActions.Size = new System.Drawing.Size(54, 20);
-            this.mnuActions.Text = "Actions";
+            mnuActions.DropDownItems.AddRange(new ToolStripItem[] { mnuClearLog, toolStripSeparator1, mnuClose });
+            mnuActions.Name = "mnuActions";
+            mnuActions.Size = new Size(59, 20);
+            mnuActions.Text = "Actions";
             // 
             // mnuClearLog
             // 
-            this.mnuClearLog.Name = "mnuClearLog";
-            this.mnuClearLog.Size = new System.Drawing.Size(119, 22);
-            this.mnuClearLog.Text = "Clear Log";
-            this.mnuClearLog.Click += new System.EventHandler(this.mnuClearLog_Click);
-            // 
-            // mnuPrintLog
-            // 
-            this.mnuPrintLog.Name = "mnuPrintLog";
-            this.mnuPrintLog.Size = new System.Drawing.Size(119, 22);
-            this.mnuPrintLog.Text = "Print Log";
-            this.mnuPrintLog.Click += new System.EventHandler(this.mnuPrintLog_Click);
+            mnuClearLog.Name = "mnuClearLog";
+            mnuClearLog.Size = new Size(180, 22);
+            mnuClearLog.Text = "Clear Log";
+            mnuClearLog.Click += mnuClearLog_Click;
             // 
             // toolStripSeparator1
             // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(116, 6);
+            toolStripSeparator1.Name = "toolStripSeparator1";
+            toolStripSeparator1.Size = new Size(177, 6);
             // 
             // mnuClose
             // 
-            this.mnuClose.Name = "mnuClose";
-            this.mnuClose.Size = new System.Drawing.Size(119, 22);
-            this.mnuClose.Text = "Close";
-            this.mnuClose.Click += new System.EventHandler(this.mnuClose_Click);
+            mnuClose.Name = "mnuClose";
+            mnuClose.Size = new Size(180, 22);
+            mnuClose.Text = "Close";
+            mnuClose.Click += mnuClose_Click;
             // 
             // txtLog
             // 
-            this.txtLog.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.txtLog.Location = new System.Drawing.Point(0, 24);
-            this.txtLog.Multiline = true;
-            this.txtLog.Name = "txtLog";
-            this.txtLog.ReadOnly = true;
-            this.txtLog.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.txtLog.Size = new System.Drawing.Size(692, 449);
-            this.txtLog.TabIndex = 1;
-            this.txtLog.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtLog_KeyDown);
+            txtLog.Dock = DockStyle.Fill;
+            txtLog.Location = new Point(0, 24);
+            txtLog.Margin = new Padding(4, 3, 4, 3);
+            txtLog.Multiline = true;
+            txtLog.Name = "txtLog";
+            txtLog.ReadOnly = true;
+            txtLog.ScrollBars = ScrollBars.Both;
+            txtLog.Size = new Size(807, 522);
+            txtLog.TabIndex = 1;
+            txtLog.KeyDown += txtLog_KeyDown;
             // 
             // frmSystemLog
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(692, 473);
-            this.Controls.Add(this.txtLog);
-            this.Controls.Add(this.mnuMain);
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.MainMenuStrip = this.mnuMain;
-            this.MinimizeBox = false;
-            this.Name = "frmSystemLog";
-            this.ShowInTaskbar = false;
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "System Log";
-            this.Shown += new System.EventHandler(this.frmSystemLog_Shown);
-            this.mnuMain.ResumeLayout(false);
-            this.mnuMain.PerformLayout();
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(807, 546);
+            Controls.Add(txtLog);
+            Controls.Add(mnuMain);
+            Icon = (Icon)resources.GetObject("$this.Icon");
+            MainMenuStrip = mnuMain;
+            Margin = new Padding(4, 3, 4, 3);
+            MinimizeBox = false;
+            Name = "frmSystemLog";
+            ShowInTaskbar = false;
+            StartPosition = FormStartPosition.CenterScreen;
+            Text = "System Log";
+            Shown += frmSystemLog_Shown;
+            mnuMain.ResumeLayout(false);
+            mnuMain.PerformLayout();
+            ResumeLayout(false);
+            PerformLayout();
 
         }
 
@@ -126,7 +116,6 @@
         private System.Windows.Forms.TextBox txtLog;
         private System.Windows.Forms.ToolStripMenuItem mnuActions;
         private System.Windows.Forms.ToolStripMenuItem mnuClearLog;
-        private System.Windows.Forms.ToolStripMenuItem mnuPrintLog;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem mnuClose;
     }
