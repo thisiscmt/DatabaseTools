@@ -1,17 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Data;
+using Microsoft.Data.Sql;
 using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
-using System.IO;
-using Nini.Config;
 
 namespace DBTools
 {
-    public partial class frmLogin : JobForm
+    public partial class frmLogin: Form
     {
         public frmLogin(bool firstLogin)
         {
@@ -51,16 +44,18 @@ namespace DBTools
                 }
 
                 txtPassword.Select();
+                this.Unload = false;
             }
             catch (Exception ex)
             {
                 Utility.HandleException("frmLogin", "New", ex.Source, ex.Message, ex.InnerException);
+                this.Unload = true;
             }
         }
 
         private void cmdOK_Click(object sender, EventArgs e)
         {
-            User user = new User();
+            User user = new();
 
             try
             {
@@ -96,7 +91,7 @@ namespace DBTools
                 if (ServerUtility.ConnectToServer(user))
                 {
                     Program.SaveLoginInfo(user);
-                    this.DialogResult = System.Windows.Forms.DialogResult.OK;
+                    this.DialogResult = DialogResult.OK;
                 }
             }
             catch (Exception ex)
@@ -121,7 +116,7 @@ namespace DBTools
                     ServerUtility.ConnectToServer(Program.CurrentUser);
                 }
 
-                this.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+                this.DialogResult = DialogResult.Cancel;
             }
             catch (Exception ex)
             {
@@ -155,8 +150,8 @@ namespace DBTools
                 if (cmbServer.Items.Count == 0)
                 {
                     Cursor.Current = Cursors.WaitCursor;
-                    servers = new List<string>();
-                    dt = System.Data.Sql.SqlDataSourceEnumerator.Instance.GetDataSources();
+                    servers = [];
+                    dt = SqlDataSourceEnumerator.Instance.GetDataSources();
 
                     foreach (DataRow dr in dt.Rows)
                     {
@@ -184,10 +179,7 @@ namespace DBTools
             {
                 Cursor.Current = Cursors.Default;
 
-                if (dt != null)
-                {
-                    dt.Dispose();
-                }
+                dt?.Dispose();
             }
         }
 
@@ -229,7 +221,11 @@ namespace DBTools
             }
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool Unload { get; set; }
+
         private string LastUserID { get; set; }
+
         private bool FirstLogin { get; set; }
     }
 }

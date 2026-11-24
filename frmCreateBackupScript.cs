@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
-using System.IO;
-using Microsoft.SqlServer.Management.Smo;
+﻿using Microsoft.SqlServer.Management.Smo;
 
 namespace DBTools
 {
@@ -175,7 +166,7 @@ namespace DBTools
 
                         break;
                     case Stages.Completed:
-                        this.DialogResult = System.Windows.Forms.DialogResult.OK;
+                        this.DialogResult = DialogResult.OK;
 
                         break;
                 }
@@ -196,7 +187,7 @@ namespace DBTools
             {
                 if (this.m_stage != Stages.Processing)
                 {
-                    this.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+                    this.DialogResult = DialogResult.Cancel;
                 }
             }
             catch (Exception ex)
@@ -241,12 +232,14 @@ namespace DBTools
 
             try
             {
-                fb = new FolderBrowserDialog();
-                fb.ShowNewFolderButton = true;
-                fb.RootFolder = Environment.SpecialFolder.MyComputer;
-                fb.Description = "Select Folder";
+                fb = new FolderBrowserDialog
+                {
+                    ShowNewFolderButton = true,
+                    RootFolder = Environment.SpecialFolder.MyComputer,
+                    Description = "Select Folder"
+                };
 
-                if (fb.ShowDialog() != System.Windows.Forms.DialogResult.Cancel)
+                if (fb.ShowDialog() != DialogResult.Cancel)
                 {
                     txtBackupDir.Text = fb.SelectedPath;
                 }

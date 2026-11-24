@@ -1,16 +1,10 @@
-﻿using System;
-using System.Windows.Forms;
-using System.Data;
-using System.IO;
-using System.Drawing;
-using System.Linq;
-using SqlDataAccess;
+﻿using System.Data;
 
 namespace DBTools
 {
     public partial class frmBrowse : Form
     {
-        private SqlDataAccess.SqlDataAccess m_db;
+        private SqlDataAccess m_db;
         private TreeNode m_selectedNode;
         private string m_path;
         private string[] m_pathParts;
@@ -49,7 +43,7 @@ namespace DBTools
                         else
                         {
                             mark = defaultPath.LastIndexOf("\\");
-                            this.m_path = defaultPath.Substring(0, mark);
+                            this.m_path = defaultPath[..mark];
                         }
                     }
                     else
@@ -70,10 +64,10 @@ namespace DBTools
                     txtFileName.Visible = false;
                     cmdOK.Location = new Point(cmdOK.Location.X, cmdOK.Location.Y - 25);
                     cmdCancel.Location = new Point(cmdCancel.Location.X, cmdCancel.Location.Y - 25);
-                    this.Height = this.Height - 25;
+                    this.Height -= 25;
                 }
 
-                m_db = new SqlDataAccess.SqlDataAccess(Program.CurrentServer.ConnectionContext.ConnectionString);
+                m_db = new SqlDataAccess(Program.CurrentServer.ConnectionContext.ConnectionString);
 
                 // Split up the path we are going to drill down to into its
                 // component folders. Appending the extra backslash for paths 
@@ -152,10 +146,7 @@ namespace DBTools
             {
                 Cursor.Current = Cursors.Default;
 
-                if (dt != null)
-                {
-                    dt.Dispose();
-                }
+                dt?.Dispose();
             }
         }
 
@@ -201,7 +192,7 @@ namespace DBTools
                     this.m_path = txtFolder.Text;
                 }
 
-                this.DialogResult = System.Windows.Forms.DialogResult.OK;
+                this.DialogResult = DialogResult.OK;
             }
             catch (Exception ex)
             {
@@ -213,7 +204,7 @@ namespace DBTools
         {
             try
             {
-                this.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+                this.DialogResult = DialogResult.Cancel;
             }
             catch (Exception ex)
             {
@@ -354,10 +345,7 @@ namespace DBTools
             }
             finally
             {
-                if (dt != null)
-                {
-                    dt.Dispose();
-                }
+                dt?.Dispose();
             }
         }
 
@@ -412,7 +400,7 @@ namespace DBTools
 
                         if (action == "Mouse")
                         {
-                            this.DialogResult = System.Windows.Forms.DialogResult.OK;
+                            this.DialogResult = DialogResult.OK;
                         }
                     }
                     else
@@ -432,7 +420,7 @@ namespace DBTools
 
                                 if (action == "Mouse")
                                 {
-                                    this.DialogResult = System.Windows.Forms.DialogResult.OK;
+                                    this.DialogResult = DialogResult.OK;
                                 }
                             }
                         }

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Xml.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace DBTools
 {
@@ -21,7 +17,7 @@ namespace DBTools
             }
         }
 
-        [XmlElement("new_database")]
+        [JsonRequired]
         public string NewDatabase { get; set; }
     }
 }

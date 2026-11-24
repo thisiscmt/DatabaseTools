@@ -1,218 +1,226 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Windows.Forms;
-using System.Data;
-using System.IO;
 using Microsoft.SqlServer.Management.Smo;
-using Nini.Config;
+using System.Text.Json;
 
-// Icons used in this application are from www.famfamfam.com
+namespace DBTools;
 
-namespace DBTools
+static class Program
 {
-    static class Program
+    private static frmMain m_mainForm;
+
+    #region Constants
+    public const string SYSTEM_LOG_FILE = "dbtools.log";
+    public const string CONFIG_FILE = "dbtools.json";
+    public const string MAIN_CAPTION = "Database Tools";
+    public const string ERROR_CAPTION = "Alert";
+
+//    public static readonly JsonSerializerOptions ConfigFileSerializerOptions = new() { WriteIndented = true };
+    #endregion
+
+    #region Main function
+    /// <summary>
+    ///  The main entry point for the application.
+    /// </summary>
+    [STAThread]
+    static void Main()
     {
-        private static frmMain m_mainForm;
+        string[] cmdArgs;
+        string argName;
+        string argValue;
+        Dictionary<string, string> argsDict;
+        bool missingArgs = false;
+        int mark;
 
-        #region Constants
-        public const string SYSTEM_LOG_FILE = "dbtools.log";
-        public const string MAIN_CAPTION = "Database Tools";
-        public const string ERROR_CAPTION = "Alert";
-        private const string CONFIG_FILE = "dbtools.ini";
-        #endregion
-
-        #region Main function
-        /// <summary>
-        /// The main entry point for the application.
-        /// </summary>
-        [STAThread]
-        static void Main()
+        try
         {
-            string[] cmdArgs;
-            string argName;
-            string argValue;
-            Dictionary<string, string> argsDict;
-            bool missingArgs = false;
-            int mark;
+            ApplicationConfiguration.Initialize();
+            //Application.EnableVisualStyles();
+            //Application.SetCompatibleTextRenderingDefault(false);
+            ApplicationPath = Application.StartupPath;
+            UserDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Database Tools");
+            AppConfigFilePath = Path.Combine(UserDataPath, CONFIG_FILE);
+            AppConfig = new();
 
-            try
+            if (!Directory.Exists(UserDataPath))
             {
-                Application.EnableVisualStyles();
-                Application.SetCompatibleTextRenderingDefault(false);
-                ApplicationPath = System.Windows.Forms.Application.StartupPath;
-                UserDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), Properties.Settings.Default.AppDataFolder);
-
-                if (!Directory.Exists(UserDataPath))
-                {
-                    Directory.CreateDirectory(UserDataPath);
-                }
-                if (!File.Exists(UserDataPath + "\\" + CONFIG_FILE))
-                {
-                    File.CreateText(UserDataPath + "\\" + CONFIG_FILE).Close();
-                }
-
-                ConfigFile = new IniConfigSource(UserDataPath + "\\" + CONFIG_FILE);
-                ConfigFile.CaseSensitive = false;
-                CurrentServer = new Server();
-                CurrentUser = new User();
-
-                // See if the proper command line switches are present for 
-                // executing a job file silently
-                cmdArgs = Environment.GetCommandLineArgs();
-                if (cmdArgs.Length > 1)
-                {
-                    argsDict = new Dictionary<string, string>();
-
-                    for (int i = 1; i < cmdArgs.Length; i++)
-                    {
-                        mark = cmdArgs[i].IndexOf(':');
-                        argName = cmdArgs[i].Substring(0, mark);
-                        argValue = cmdArgs[i].Substring(mark + 1, cmdArgs[i].Length - mark - 1);
-                        argsDict.Add(argName, argValue);
-                    }
-
-                    if (argsDict.ContainsKey("/jobfile") && argsDict.ContainsKey("/server"))
-                    {
-                        CurrentUser.Authentication = User.AuthenticationType.Windows;
-
-                        if (argsDict.ContainsKey("/auth") && argsDict["/auth"].ToLower() == "sql")
-                        {
-                            if (argsDict.ContainsKey("/user") && argsDict.ContainsKey("/password"))
-                            {
-                                CurrentUser.Authentication = User.AuthenticationType.SQL;
-                                CurrentUser.UserID = argsDict["/user"];
-                                CurrentUser.Password = argsDict["/password"];
-                            }
-                            else
-                            {
-                                Utility.WriteToSystemLog("", "Missing a SQL user name or password from the command line. No jobs have been run.");
-                                missingArgs = true;
-                            }
-                        }
-
-                        if (!missingArgs)
-                        {
-                            SilentExecution = true;
-                            CurrentUser.Server = argsDict["/server"];
-                            ServerUtility.ConnectToServer(CurrentUser);
-                            Utility.RunJobsSilently(argsDict["/jobfile"]);
-                        }
-
-                        return;
-                    }
-                }
-
-                m_mainForm = new frmMain();
-
-                if (!m_mainForm.Unload)
-                {
-                    m_mainForm.Show();
-
-                    if (ShowLoginForm(true))
-                    {
-                        m_mainForm.Initialize(Program.CurrentUser.Server);
-                        Application.Run(m_mainForm);
-                    }
-                    else
-                    {
-                        m_mainForm.Dispose();
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Utility.HandleException("Program", "Main", ex.Source, ex.Message, ex.InnerException);
-            }
-        }
-        #endregion
-
-        #region Global functions
-        public static bool ShowLoginForm(bool firstLogin = false)
-        {
-            frmLogin loginForm = null;
-            DialogResult result;
-            bool retVal = false;
-
-            using (loginForm = new frmLogin(firstLogin))
-            {
-                if (!loginForm.Unload)
-                {
-                    result = loginForm.ShowDialog();
-
-                    if (result == System.Windows.Forms.DialogResult.OK)
-                    {
-                        retVal = true;
-                    }
-                }
+                Directory.CreateDirectory(UserDataPath);
             }
 
-            return retVal;
-        }
-
-        public static User LoadLoginInfo()
-        {
-            User user = new User();
-            IConfig mruSection = ConfigFile.Configs["MRU"];
-            
-            if (mruSection != null)
+            if (File.Exists(AppConfigFilePath))
             {
-                user.UserID = mruSection.GetString("UserID");
-                user.Server = mruSection.GetString("Server");
-                user.Authentication = (User.AuthenticationType)Enum.Parse(typeof(User.AuthenticationType), mruSection.GetString("Authentication"));
-            }
+                try
+                {
+                    string jsonString = File.ReadAllText(AppConfigFilePath);
+                    AppConfig = JsonSerializer.Deserialize<AppConfiguration>(jsonString);
+                }
+                catch
+                {
+                    AppConfig = new();
+                }
 
-            return user;
-        }
-
-        public static void SaveLoginInfo(User user)
-        {
-            IConfig mruSection = ConfigFile.Configs["MRU"];
-
-            CurrentUser.Server = user.Server;
-
-            if (mruSection == null)
-            {
-                mruSection = ConfigFile.Configs.Add("MRU");
-            }
-
-            if (user.Authentication == User.AuthenticationType.Windows)
-            {
-                CurrentUser.Authentication = User.AuthenticationType.Windows;
-                CurrentUser.UserID = Environment.UserName;
-                CurrentUser.Password = "";
-                mruSection.Set("Authentication", User.AuthenticationType.Windows.ToString());
             }
             else
             {
-                CurrentUser.Authentication = User.AuthenticationType.SQL;
-                CurrentUser.UserID = user.UserID;
-                CurrentUser.Password = user.Password;
-                mruSection.Set("Authentication", User.AuthenticationType.SQL.ToString());
+                AppConfig = new();
             }
 
-            mruSection.Set("UserID", Program.CurrentUser.UserID);
-            mruSection.Set("Server", Program.CurrentUser.Server);
-            ConfigFile.Save();
-        }
-        #endregion
+            CurrentServer = new Server();
+            CurrentUser = new User();
 
-        #region Properties
-        public static frmMain MainForm
-        {
-            get
+            // See if the proper command line switches are present for executing a job file silently
+            cmdArgs = Environment.GetCommandLineArgs();
+            if (cmdArgs.Length > 1)
             {
-                return m_mainForm;
+                argsDict = [];
+
+                for (int i = 1; i < cmdArgs.Length; i++)
+                {
+                    mark = cmdArgs[i].IndexOf(':');
+                    argName = cmdArgs[i][..mark];
+                    argValue = cmdArgs[i].Substring(mark + 1, cmdArgs[i].Length - mark - 1);
+                    argsDict.Add(argName, argValue);
+                }
+
+                if (argsDict.ContainsKey("/jobfile") && argsDict.ContainsKey("/server"))
+                {
+                    CurrentUser.Authentication = User.AuthenticationType.Windows;
+
+                    if (argsDict.ContainsKey("/auth") && argsDict["/auth"].ToLower() == "sql")
+                    {
+                        if (argsDict.ContainsKey("/user") && argsDict.ContainsKey("/password"))
+                        {
+                            CurrentUser.Authentication = User.AuthenticationType.SQL;
+                            CurrentUser.UserID = argsDict["/user"];
+                            CurrentUser.Password = argsDict["/password"];
+                        }
+                        else
+                        {
+                            Utility.WriteToSystemLog("", "Missing a SQL user name or password from the command line. No jobs have been run.");
+                            missingArgs = true;
+                        }
+                    }
+
+                    if (!missingArgs)
+                    {
+                        SilentExecution = true;
+                        CurrentUser.Server = argsDict["/server"];
+                        ServerUtility.ConnectToServer(CurrentUser);
+                        Utility.RunJobsSilently(argsDict["/jobfile"]);
+                    }
+
+                    return;
+                }
+            }
+
+            m_mainForm = new frmMain();
+
+            if (!m_mainForm.Unload)
+            {
+                m_mainForm.Show();
+
+                if (ShowLoginForm(true))
+                {
+                    m_mainForm.Initialize(Program.CurrentUser.Server);
+                    Application.Run(m_mainForm);
+                }
+                else
+                {
+                    m_mainForm.Dispose();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Utility.HandleException("Program", "Main", ex.Source, ex.Message, ex.InnerException);
+        }
+    }
+    #endregion
+
+    #region Global functions
+    public static bool ShowLoginForm(bool firstLogin = false)
+    {
+        frmLogin loginForm;
+        DialogResult result;
+        bool retVal = false;
+
+        using (loginForm = new frmLogin(firstLogin))
+        {
+            if (!loginForm.Unload)
+            {
+                result = loginForm.ShowDialog();
+
+                if (result == DialogResult.OK)
+                {
+                    retVal = true;
+                }
             }
         }
 
-        public static string ApplicationPath { get; set; }
-        public static string UserDataPath { get; set; }
-        public static Server CurrentServer { get; set; }
-        public static User CurrentUser { get; set; }
-        public static string CurrentJobFile { get; set; }
-        public static IniConfigSource ConfigFile { get; set; }
-        public static bool SilentExecution { get; set; }
-        #endregion
+        return retVal;
     }
+
+    public static User LoadLoginInfo()
+    {
+        var auth = !string.IsNullOrEmpty(AppConfig.Authentication) ? Enum.Parse<User.AuthenticationType>(AppConfig.Authentication) : User.AuthenticationType.Windows;
+
+        User user = new()
+        {
+            UserID = AppConfig.UserID,
+            Server = AppConfig.Server,
+            Authentication = auth
+        };
+
+        return user;
+    }
+
+    public static void SaveLoginInfo(User user)
+    {
+        CurrentUser.Server = user.Server;
+
+        if (user.Authentication == User.AuthenticationType.Windows)
+        {
+            CurrentUser.Authentication = User.AuthenticationType.Windows;
+            CurrentUser.UserID = Environment.UserName;
+            CurrentUser.Password = "";
+            AppConfig.Authentication = User.AuthenticationType.Windows.ToString();
+        }
+        else
+        {
+            CurrentUser.Authentication = User.AuthenticationType.SQL;
+            CurrentUser.UserID = user.UserID;
+            CurrentUser.Password = user.Password;
+            AppConfig.Authentication = User.AuthenticationType.SQL.ToString();
+        }
+
+        AppConfig.UserID = Program.CurrentUser.UserID;
+        AppConfig.Server = Program.CurrentUser.Server;
+
+        Utility.SaveAppConfig();
+    }
+    #endregion
+
+    #region Properties
+    public static frmMain MainForm
+    {
+        get
+        {
+            return m_mainForm;
+        }
+    }
+
+    public static string ApplicationPath { get; set; }
+
+    public static string UserDataPath { get; set; }
+
+    public static string AppConfigFilePath { get; set; }
+
+    public static Server CurrentServer { get; set; }
+
+    public static User CurrentUser { get; set; }
+
+    public static string CurrentJobFile { get; set; }
+
+    public static AppConfiguration AppConfig { get; set; }
+
+    public static bool SilentExecution { get; set; }
+    #endregion
 }

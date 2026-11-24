@@ -11,7 +11,7 @@ namespace DBTools
     /// </summary>
     class BackgroundWorkerExt: BackgroundWorker
     {
-        private Object m_lock = new Object();
+        private Object m_lock = new();
         private bool m_paused;
 
         public BackgroundWorkerExt()

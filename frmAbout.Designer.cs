@@ -29,99 +29,85 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmAbout));
-            this.cmdOK = new System.Windows.Forms.Button();
-            this.pbIcon = new System.Windows.Forms.PictureBox();
-            this.lblDesc = new System.Windows.Forms.Label();
-            this.Line2 = new System.Windows.Forms.Label();
-            this.Line1 = new System.Windows.Forms.Label();
-            this.lblAck = new System.Windows.Forms.Label();
-            this.lblLink = new System.Windows.Forms.LinkLabel();
-            ((System.ComponentModel.ISupportInitialize)(this.pbIcon)).BeginInit();
-            this.SuspendLayout();
+            cmdOK = new Button();
+            pbIcon = new PictureBox();
+            lblDesc = new Label();
+            Line2 = new Label();
+            Line1 = new Label();
+            ((System.ComponentModel.ISupportInitialize)pbIcon).BeginInit();
+            SuspendLayout();
             // 
             // cmdOK
             // 
-            this.cmdOK.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.cmdOK.Location = new System.Drawing.Point(96, 106);
-            this.cmdOK.Name = "cmdOK";
-            this.cmdOK.Size = new System.Drawing.Size(75, 23);
-            this.cmdOK.TabIndex = 0;
-            this.cmdOK.Text = "OK";
-            this.cmdOK.UseVisualStyleBackColor = true;
-            this.cmdOK.Click += new System.EventHandler(this.cmdOK_Click);
+            cmdOK.DialogResult = DialogResult.Cancel;
+            cmdOK.Location = new Point(112, 122);
+            cmdOK.Margin = new Padding(4, 4, 4, 4);
+            cmdOK.Name = "cmdOK";
+            cmdOK.Size = new Size(88, 26);
+            cmdOK.TabIndex = 0;
+            cmdOK.Text = "OK";
+            cmdOK.UseVisualStyleBackColor = true;
+            cmdOK.Click += cmdOK_Click;
             // 
             // pbIcon
             // 
-            this.pbIcon.Image = ((System.Drawing.Image)(resources.GetObject("pbIcon.Image")));
-            this.pbIcon.Location = new System.Drawing.Point(8, 10);
-            this.pbIcon.Name = "pbIcon";
-            this.pbIcon.Size = new System.Drawing.Size(32, 32);
-            this.pbIcon.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pbIcon.TabIndex = 1;
-            this.pbIcon.TabStop = false;
+            pbIcon.Image = (Image)resources.GetObject("pbIcon.Image");
+            pbIcon.Location = new Point(10, 11);
+            pbIcon.Margin = new Padding(4, 4, 4, 4);
+            pbIcon.Name = "pbIcon";
+            pbIcon.Size = new Size(38, 37);
+            pbIcon.SizeMode = PictureBoxSizeMode.StretchImage;
+            pbIcon.TabIndex = 1;
+            pbIcon.TabStop = false;
             // 
             // lblDesc
             // 
-            this.lblDesc.Location = new System.Drawing.Point(51, 8);
-            this.lblDesc.Name = "lblDesc";
-            this.lblDesc.Size = new System.Drawing.Size(210, 40);
-            this.lblDesc.TabIndex = 2;
+            lblDesc.Location = new Point(58, 9);
+            lblDesc.Margin = new Padding(4, 0, 4, 0);
+            lblDesc.Name = "lblDesc";
+            lblDesc.Size = new Size(245, 92);
+            lblDesc.TabIndex = 2;
             // 
             // Line2
             // 
-            this.Line2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(128)))), ((int)(((byte)(128)))), ((int)(((byte)(128)))));
-            this.Line2.Location = new System.Drawing.Point(2, 95);
-            this.Line2.Name = "Line2";
-            this.Line2.Size = new System.Drawing.Size(263, 1);
-            this.Line2.TabIndex = 24;
+            Line2.BackColor = Color.FromArgb(128, 128, 128);
+            Line2.Location = new Point(3, 110);
+            Line2.Margin = new Padding(4, 0, 4, 0);
+            Line2.Name = "Line2";
+            Line2.Size = new Size(307, 1);
+            Line2.TabIndex = 24;
             // 
             // Line1
             // 
-            this.Line1.BackColor = System.Drawing.Color.White;
-            this.Line1.Location = new System.Drawing.Point(3, 96);
-            this.Line1.Name = "Line1";
-            this.Line1.Size = new System.Drawing.Size(262, 1);
-            this.Line1.TabIndex = 25;
-            // 
-            // lblAck
-            // 
-            this.lblAck.Location = new System.Drawing.Point(51, 57);
-            this.lblAck.Name = "lblAck";
-            this.lblAck.Size = new System.Drawing.Size(185, 13);
-            this.lblAck.TabIndex = 26;
-            // 
-            // lblLink
-            // 
-            this.lblLink.LinkBehavior = System.Windows.Forms.LinkBehavior.HoverUnderline;
-            this.lblLink.Location = new System.Drawing.Point(51, 70);
-            this.lblLink.Name = "lblLink";
-            this.lblLink.Size = new System.Drawing.Size(210, 13);
-            this.lblLink.TabIndex = 27;
-            this.lblLink.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lblLink_LinkClicked);
+            Line1.BackColor = Color.White;
+            Line1.Location = new Point(4, 111);
+            Line1.Margin = new Padding(4, 0, 4, 0);
+            Line1.Name = "Line1";
+            Line1.Size = new Size(305, 2);
+            Line1.TabIndex = 25;
             // 
             // frmAbout
             // 
-            this.AcceptButton = this.cmdOK;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.CancelButton = this.cmdOK;
-            this.ClientSize = new System.Drawing.Size(267, 137);
-            this.Controls.Add(this.lblLink);
-            this.Controls.Add(this.lblAck);
-            this.Controls.Add(this.Line2);
-            this.Controls.Add(this.Line1);
-            this.Controls.Add(this.lblDesc);
-            this.Controls.Add(this.pbIcon);
-            this.Controls.Add(this.cmdOK);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
-            this.Name = "frmAbout";
-            this.ShowInTaskbar = false;
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "About";
-            ((System.ComponentModel.ISupportInitialize)(this.pbIcon)).EndInit();
-            this.ResumeLayout(false);
+            AcceptButton = cmdOK;
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            CancelButton = cmdOK;
+            ClientSize = new Size(312, 158);
+            Controls.Add(Line2);
+            Controls.Add(Line1);
+            Controls.Add(lblDesc);
+            Controls.Add(pbIcon);
+            Controls.Add(cmdOK);
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            Margin = new Padding(4, 4, 4, 4);
+            MaximizeBox = false;
+            MinimizeBox = false;
+            Name = "frmAbout";
+            ShowInTaskbar = false;
+            StartPosition = FormStartPosition.CenterScreen;
+            Text = "About";
+            ((System.ComponentModel.ISupportInitialize)pbIcon).EndInit();
+            ResumeLayout(false);
 
         }
 
@@ -132,7 +118,5 @@
         private System.Windows.Forms.Label lblDesc;
         public System.Windows.Forms.Label Line2;
         public System.Windows.Forms.Label Line1;
-        private System.Windows.Forms.Label lblAck;
-        private System.Windows.Forms.LinkLabel lblLink;
     }
 }

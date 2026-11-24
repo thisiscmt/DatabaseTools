@@ -22,6 +22,7 @@ namespace DBTools
 
             Program.CurrentServer.ConnectionContext.NonPooledConnection = true;
             Program.CurrentServer.ConnectionContext.ServerInstance = user.Server;
+//            Program.CurrentServer.ConnectionContext.MultipleActiveResultSets = true;
 
             if (user.Authentication == User.AuthenticationType.Windows)
             {

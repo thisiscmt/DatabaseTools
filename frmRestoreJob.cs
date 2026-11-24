@@ -1,18 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Data;
-using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
-using System.IO;
 using Microsoft.SqlServer.Management.Smo;
 
 namespace DBTools
 {
-    public partial class frmRestoreJob : JobForm
+    public partial class frmRestoreJob : Form
     {
         private string m_key;
         private string m_path;
@@ -108,11 +100,13 @@ namespace DBTools
                 if (ValidInput())
                 {
                     task = Job.GetTaskValue(cmbRestoreTask.Text);
-                    job = new RestoreJob();
-                    job.Key = this.m_key;
-                    job.Task = task;
-                    job.Path = txtRestoreFrom.Text;
-                    job.ClearUsers = chkClearUsers.Checked;
+                    job = new RestoreJob
+                    {
+                        Key = this.m_key,
+                        Task = task,
+                        Path = txtRestoreFrom.Text,
+                        ClearUsers = chkClearUsers.Checked
+                    };
 
                     switch (task)
                     {
@@ -169,7 +163,7 @@ namespace DBTools
 
         private void cmdBrowse_Click(object sender, EventArgs e)
         {
-            frmBrowse browseForm = null;
+            frmBrowse browseForm;
             Job.JobTasks task;
             bool includeFiles;
 
@@ -391,9 +385,8 @@ namespace DBTools
                 res = new Restore();
                 res.Devices.AddDevice(txtRestoreFrom.Text, DeviceType.File);
 
-                // If reading the backup header fails, we just exit. the user might 
-                // have selected a Zip file, or typed in the name of a file that 
-                // doesn't exist yet but will from a backup job that runs earlier
+                // If reading the backup header fails, we just exit. The user might have selected a Zip file, or typed in the name of a file that 
+                // doesn't exist yet but will from a backup job that runs earlier.
                 try
                 {
                     dt = res.ReadBackupHeader(Program.CurrentServer);
@@ -438,12 +431,17 @@ namespace DBTools
             }
             finally
             {
-                if (dt != null)
-                {
-                    dt.Dispose();
-                }
+                dt?.Dispose();
             }
         }
+        #endregion
+
+        #region Properties
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public JobFormActions Action { get; set; }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool Unload { get; set; }
         #endregion
     }
 }

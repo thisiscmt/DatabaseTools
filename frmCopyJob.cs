@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
+﻿using System.ComponentModel;
 
 namespace DBTools
 {
-    public partial class frmCopyJob : JobForm
+    public partial class frmCopyJob : Form
     {
         private string m_key;
 
@@ -21,12 +14,15 @@ namespace DBTools
             try
             {
                 this.Action = JobFormActions.Add;
-                this.Text = JobFormActions.Add.ToString() + " Shrink Job";
+                this.Text = JobFormActions.Add.ToString() + " Copy Job";
                 cmbDatabase.Select();
+
+                this.Unload = false;
             }
             catch (Exception ex)
             {
                 Utility.HandleException("frmCopyJob", "New", ex.Source, ex.Message, ex.InnerException);
+                this.Unload = true;
             }
         }
 
@@ -37,15 +33,18 @@ namespace DBTools
             try
             {
                 this.Action = JobFormActions.Edit;
-                this.Text = JobFormActions.Edit.ToString() + " Shrink Job";
+                this.Text = JobFormActions.Edit.ToString() + " Copy Job";
                 this.m_key = job.Key;
                 cmbDatabase.Text = job.Database;
                 cmbNewDB.Text = job.NewDatabase;
                 cmbDatabase.Select();
+
+                this.Unload = false;
             }
             catch (Exception ex)
             {
                 Utility.HandleException("frmCopyJob", "New", ex.Source, ex.Message, ex.InnerException);
+                this.Unload = true;
             }
         }
         #endregion
@@ -59,10 +58,12 @@ namespace DBTools
             {
                 if (ValidInput())
                 {
-                    job = new CopyJob();
-                    job.Key = this.m_key;
-                    job.Database = cmbDatabase.Text;
-                    job.NewDatabase = cmbNewDB.Text;
+                    job = new CopyJob
+                    {
+                        Key = this.m_key,
+                        Database = cmbDatabase.Text,
+                        NewDatabase = cmbNewDB.Text
+                    };
 
                     if (Program.MainForm.SaveJobToList(job, this.Action))
                     {
@@ -194,6 +195,14 @@ namespace DBTools
                 return false;
             }
         }
+        #endregion
+
+        #region Properties
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public JobFormActions Action { get; set; }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool Unload { get; set; }
         #endregion
     }
 }

@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.ComponentModel;
 
 namespace DBTools
 {
-    public abstract class WizardForm : System.Windows.Forms.Form
+    public abstract class WizardForm : Form
     {
         protected System.Windows.Forms.Button cmdBack;
         protected System.Windows.Forms.Button cmdNext;
@@ -192,6 +189,7 @@ namespace DBTools
 
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool Unload { get; set; }
     }
 }

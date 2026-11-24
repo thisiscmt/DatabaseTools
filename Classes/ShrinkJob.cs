@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Xml.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace DBTools
 {
@@ -18,22 +17,22 @@ namespace DBTools
             }
         }
 
-        [XmlElement("recovery_model")]
+        [JsonRequired]
         public string RecoveryModel { get; set; }
 
-        [XmlElement("set_to_simple")]
+        [JsonRequired]
         public bool SetToSimple { get; set; }
 
-        [XmlElement("update_indexes")]
+        [JsonRequired]
         public bool UpdateIndexes { get; set; }
 
-        [XmlElement("shrink_file")]
+        [JsonRequired]
         public bool ShrinkFile { get; set; }
 
-        [XmlElement("file_to_shrink")]
+        [JsonRequired]
         public string FileToShrink { get; set; }
 
-        [XmlElement("file_type")]
+        [JsonRequired]
         public string FileType { get; set; }
     }
 }
