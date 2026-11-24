@@ -9,7 +9,7 @@ namespace DBTools
         {
             InitializeComponent();
 
-            FileVersionInfo fileInfo = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location);
+            FileVersionInfo fileInfo = FileVersionInfo.GetVersionInfo(Path.Combine(System.AppContext.BaseDirectory, "DBTools.exe"));
             string ver = fileInfo.FileMajorPart.ToString() + "." + fileInfo.FileMinorPart.ToString() + "." + fileInfo.FileBuildPart.ToString();
             string desc = "Database Tools " + ver + Environment.NewLine + Environment.NewLine;
             desc = desc + ((AssemblyDescriptionAttribute)Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyDescriptionAttribute), false)[0]).Description + Environment.NewLine;
